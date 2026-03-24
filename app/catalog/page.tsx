@@ -84,23 +84,23 @@ function CatalogContent() {
 
           {/* Search */}
           <div>
-            <div className="text-[13px] font-bold mb-2 text-[--muted] uppercase tracking-wide">Пошук</div>
+            <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">Пошук</div>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Назва, бренд..."
-              className="w-full h-9 bg-[--card] border border-[--border] text-[--text] text-sm px-3 rounded focus:border-[--muted] outline-none"
+              className="w-full h-9 bg-(--card) border border-(--border) text-(--text) text-sm px-3 rounded focus:border-(--muted) outline-none"
             />
           </div>
 
           {/* Categories */}
           <div>
-            <div className="text-[13px] font-bold mb-2 text-[--muted] uppercase tracking-wide">Категорія</div>
+            <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">Категорія</div>
             <div className="flex flex-col gap-0.5">
               <button
                 onClick={() => setCategory('')}
-                className={`text-left px-2.5 py-2 rounded text-[13px] transition-colors ${!category ? 'bg-[--accent] text-white font-semibold' : 'text-[--muted] hover:text-[--text] hover:bg-[--card]'}`}
+                className={`text-left px-2.5 py-2 rounded text-[13px] transition-colors ${!category ? 'bg-(--accent) text-white font-semibold' : 'text-(--muted) hover:text-(--text) hover:bg-(--card)'}`}
               >
                 Всі категорії
               </button>
@@ -108,7 +108,7 @@ function CatalogContent() {
                 <button
                   key={cat}
                   onClick={() => setCategory(cat)}
-                  className={`text-left px-2.5 py-2 rounded text-[13px] transition-colors ${category === cat ? 'bg-[--accent] text-white font-semibold' : 'text-[--muted] hover:text-[--text] hover:bg-[--card]'}`}
+                  className={`text-left px-2.5 py-2 rounded text-[13px] transition-colors ${category === cat ? 'bg-(--accent) text-white font-semibold' : 'text-(--muted) hover:text-(--text) hover:bg-(--card)'}`}
                 >
                   {categoryEmojis[cat]} {categoryLabels[cat]}
                 </button>
@@ -118,7 +118,7 @@ function CatalogContent() {
 
           {/* Badges */}
           <div>
-            <div className="text-[13px] font-bold mb-2 text-[--muted] uppercase tracking-wide">Тип</div>
+            <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">Тип</div>
             <div className="flex flex-col gap-0.5">
               {[
                 { value: '', label: 'Всі' },
@@ -129,7 +129,7 @@ function CatalogContent() {
                 <button
                   key={value}
                   onClick={() => setBadge(value)}
-                  className={`text-left px-2.5 py-2 rounded text-[13px] transition-colors ${badge === value ? 'bg-[--accent] text-white font-semibold' : 'text-[--muted] hover:text-[--text] hover:bg-[--card]'}`}
+                  className={`text-left px-2.5 py-2 rounded text-[13px] transition-colors ${badge === value ? 'bg-(--accent) text-white font-semibold' : 'text-(--muted) hover:text-(--text) hover:bg-(--card)'}`}
                 >
                   {label}
                 </button>
@@ -139,7 +139,7 @@ function CatalogContent() {
 
           {/* Price */}
           <div>
-            <div className="text-[13px] font-bold mb-2 text-[--muted] uppercase tracking-wide">
+            <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">
               Макс. ціна: {maxPrice.toLocaleString('uk-UA')} ₴
             </div>
             <input
@@ -149,9 +149,9 @@ function CatalogContent() {
               step={1000}
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
-              className="w-full accent-[--accent]"
+              className="w-full accent-(--accent)"
             />
-            <div className="flex justify-between text-[11px] text-[--muted] mt-1">
+            <div className="flex justify-between text-[11px] text-(--muted) mt-1">
               <span>1 000 ₴</span>
               <span>100 000 ₴</span>
             </div>
@@ -163,14 +163,14 @@ function CatalogContent() {
               type="checkbox"
               checked={inStockOnly}
               onChange={(e) => setInStockOnly(e.target.checked)}
-              className="w-4 h-4 accent-[--accent]"
+              className="w-4 h-4 accent-(--accent)"
             />
             <span className="text-[13px]">Тільки в наявності</span>
           </label>
 
           <button
             onClick={resetFilters}
-            className="text-[13px] text-[--muted] hover:text-[--text] transition-colors underline text-left"
+            className="text-[13px] text-(--muted) hover:text-(--text) transition-colors underline text-left"
           >
             Скинути фільтри
           </button>
@@ -180,13 +180,13 @@ function CatalogContent() {
         <div className="flex-1">
           {/* Toolbar */}
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[--muted] text-sm">
-              Знайдено: <strong className="text-[--text]">{filtered.length}</strong> товарів
+            <span className="text-(--muted) text-sm">
+              Знайдено: <strong className="text-(--text)">{filtered.length}</strong> товарів
             </span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="bg-[--card] border border-[--border] text-[--text] text-sm px-3 h-9 rounded outline-none focus:border-[--muted]"
+              className="bg-(--card) border border-(--border) text-(--text) text-sm px-3 h-9 rounded outline-none focus:border-(--muted)"
             >
               {sortOptions.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -195,12 +195,12 @@ function CatalogContent() {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="text-center py-20 text-[--muted]">
+            <div className="text-center py-20 text-(--muted)">
               <div className="text-5xl mb-4">🔍</div>
               <div className="text-lg font-semibold mb-2">Нічого не знайдено</div>
               <button
                 onClick={resetFilters}
-                className="text-[--accent] underline text-sm hover:opacity-80"
+                className="text-(--accent) underline text-sm hover:opacity-80"
               >
                 Скинути фільтри
               </button>
@@ -220,7 +220,7 @@ function CatalogContent() {
 
 export default function CatalogPage() {
   return (
-    <Suspense fallback={<div className="text-center py-20 text-[--muted]">Завантаження...</div>}>
+    <Suspense fallback={<div className="text-center py-20 text-(--muted)">Завантаження...</div>}>
       <CatalogContent />
     </Suspense>
   );

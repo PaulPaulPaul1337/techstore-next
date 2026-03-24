@@ -36,19 +36,19 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   return (
     <div className="max-w-[1440px] mx-auto px-4 py-6">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-[13px] text-[--muted] mb-6">
-        <Link href="/" className="hover:text-[--text] transition-colors">Головна</Link>
+      <nav className="flex items-center gap-2 text-[13px] text-(--muted) mb-6">
+        <Link href="/" className="hover:text-(--text) transition-colors">Головна</Link>
         <span>/</span>
-        <Link href={`/catalog?category=${product.category}`} className="hover:text-[--text] transition-colors">
+        <Link href={`/catalog?category=${product.category}`} className="hover:text-(--text) transition-colors">
           {categoryEmojis[product.category]} {categoryLabels[product.category]}
         </Link>
         <span>/</span>
-        <span className="text-[--text] truncate max-w-xs">{product.name}</span>
+        <span className="text-(--text) truncate max-w-xs">{product.name}</span>
       </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         {/* Image */}
-        <div className="bg-[--card] rounded-lg flex items-center justify-center aspect-square text-[160px] relative">
+        <div className="bg-(--card) rounded-lg flex items-center justify-center aspect-square text-[160px] relative">
           {product.emoji}
           {discount && (
             <span
@@ -66,7 +66,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         {/* Info */}
         <div className="flex flex-col gap-4">
           <div>
-            <div className="text-[--muted] text-sm font-semibold mb-1">{product.brand}</div>
+            <div className="text-(--muted) text-sm font-semibold mb-1">{product.brand}</div>
             <h1 className="text-2xl font-bold leading-snug">{product.name}</h1>
           </div>
 
@@ -79,7 +79,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </span>
               ))}
             </div>
-            <span className="text-[--muted] text-sm">{product.reviewCount} відгуків</span>
+            <span className="text-(--muted) text-sm">{product.reviewCount} відгуків</span>
           </div>
 
           {/* Price */}
@@ -88,7 +88,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               {product.price.toLocaleString('uk-UA')} ₴
             </span>
             {product.oldPrice && (
-              <span className="text-lg text-[--old-price] line-through">
+              <span className="text-lg text-(--old-price) line-through">
                 {product.oldPrice.toLocaleString('uk-UA')} ₴
               </span>
             )}
@@ -102,7 +102,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           {/* Colors */}
           {product.colors && product.colors.length > 1 && (
             <div>
-              <div className="text-sm font-semibold text-[--muted] mb-2">Колір:</div>
+              <div className="text-sm font-semibold text-(--muted) mb-2">Колір:</div>
               <div className="flex gap-2">
                 {product.colors.map((c) => (
                   <button
@@ -123,17 +123,17 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           {/* Qty + Add to cart */}
           {product.inStock && (
             <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center bg-[--card] border border-[--border] rounded overflow-hidden">
+              <div className="flex items-center bg-(--card) border border-(--border) rounded overflow-hidden">
                 <button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="w-10 h-11 text-xl text-[--muted] hover:text-[--text] transition-colors"
+                  className="w-10 h-11 text-xl text-(--muted) hover:text-(--text) transition-colors"
                 >
                   −
                 </button>
                 <span className="w-10 text-center font-bold">{qty}</span>
                 <button
                   onClick={() => setQty((q) => q + 1)}
-                  className="w-10 h-11 text-xl text-[--muted] hover:text-[--text] transition-colors"
+                  className="w-10 h-11 text-xl text-(--muted) hover:text-(--text) transition-colors"
                 >
                   +
                 </button>
@@ -141,14 +141,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <button
                 onClick={handleAdd}
                 className={`flex-1 h-11 font-bold text-white rounded transition-all duration-200 ${
-                  added ? 'bg-green-700' : 'bg-[--accent] hover:bg-[--accent-hover] hover:-translate-y-0.5'
+                  added ? 'bg-green-700' : 'bg-(--accent) hover:bg-(--accent-hover) hover:-translate-y-0.5'
                 }`}
               >
                 {added ? '✓ Додано до кошику!' : 'В кошик'}
               </button>
               <Link
                 href="/cart"
-                className="h-11 px-5 border border-[--border] rounded font-semibold text-sm text-[--muted] hover:text-[--text] hover:border-[--muted] transition-all flex items-center"
+                className="h-11 px-5 border border-(--border) rounded font-semibold text-sm text-(--muted) hover:text-(--text) hover:border-(--muted) transition-all flex items-center"
               >
                 🛒 Кошик
               </Link>
@@ -156,12 +156,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           )}
 
           {/* Specs */}
-          <div className="bg-[--card] rounded-lg p-4 mt-2">
+          <div className="bg-(--card) rounded-lg p-4 mt-2">
             <h3 className="font-bold mb-3">Характеристики</h3>
             <ul className="space-y-2">
               {product.specs.map((spec) => (
-                <li key={spec} className="flex items-center gap-2 text-sm text-[--muted]">
-                  <span className="text-[--accent]">•</span>
+                <li key={spec} className="flex items-center gap-2 text-sm text-(--muted)">
+                  <span className="text-(--accent)">•</span>
                   {spec}
                 </li>
               ))}
@@ -171,7 +171,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           {/* Description */}
           <div>
             <h3 className="font-bold mb-2">Опис</h3>
-            <p className="text-[--muted] text-sm leading-relaxed">{product.description}</p>
+            <p className="text-(--muted) text-sm leading-relaxed">{product.description}</p>
           </div>
         </div>
       </div>

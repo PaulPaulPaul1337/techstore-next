@@ -1,110 +1,169 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
-import { useCartStore } from '@/store/cartStore';
-import { products } from '@/data/products';
 
-const slides = [
-  {
-    product: products[0],
-    bg: 'linear-gradient(120deg, #111 40%, #1a0a0b 100%)',
-  },
-  {
-    product: products[1],
-    bg: 'linear-gradient(120deg, #0a0a1a 40%, #101030 100%)',
-  },
-  {
-    product: products[2],
-    bg: 'linear-gradient(120deg, #0a1a0a 40%, #0d2010 100%)',
-  },
+type PromoCard = {
+  title: string;
+  subtitle: string;
+  badge: string;
+  badgeColor: string;
+  bg: string;
+  emoji: string;
+  href: string;
+};
+
+const slides: PromoCard[][] = [
+  [
+    {
+      title: 'Смартфони',
+      subtitle: 'Флагмани та бюджетні',
+      badge: 'до -20%',
+      badgeColor: '#2563eb',
+      bg: 'linear-gradient(145deg, #0f172a 0%, #1e1b4b 100%)',
+      emoji: '📱',
+      href: '/catalog?category=smartphones',
+    },
+    {
+      title: 'Ноутбуки',
+      subtitle: 'Для роботи і навчання',
+      badge: 'до -17%',
+      badgeColor: '#7c3aed',
+      bg: 'linear-gradient(145deg, #1a1a0a 0%, #14532d 100%)',
+      emoji: '💻',
+      href: '/catalog?category=laptops',
+    },
+    {
+      title: 'Навушники',
+      subtitle: 'Hi-Fi та шумодав',
+      badge: 'до -30%',
+      badgeColor: '#db2777',
+      bg: 'linear-gradient(145deg, #1c0a0a 0%, #450a0a 100%)',
+      emoji: '🎧',
+      href: '/catalog?category=headphones',
+    },
+    {
+      title: 'Аксесуари',
+      subtitle: 'Все для гаджетів',
+      badge: 'до -44%',
+      badgeColor: '#059669',
+      bg: 'linear-gradient(145deg, #0a1a0a 0%, #052e16 100%)',
+      emoji: '🖱️',
+      href: '/catalog?category=accessories',
+    },
+  ],
+  [
+    {
+      title: 'Монітори',
+      subtitle: '4K та ігрові',
+      badge: 'до -25%',
+      badgeColor: '#ea580c',
+      bg: 'linear-gradient(145deg, #1a0f00 0%, #431407 100%)',
+      emoji: '🖥️',
+      href: '/catalog?category=monitors',
+    },
+    {
+      title: 'Камери',
+      subtitle: 'Фото і відео',
+      badge: 'до -15%',
+      badgeColor: '#0891b2',
+      bg: 'linear-gradient(145deg, #0a1520 0%, #0c4a6e 100%)',
+      emoji: '📷',
+      href: '/catalog?category=cameras',
+    },
+    {
+      title: 'Ігрова зона',
+      subtitle: 'Консолі та геймпади',
+      badge: 'Хіт!',
+      badgeColor: '#dc2626',
+      bg: 'linear-gradient(145deg, #1a0a1a 0%, #3b0764 100%)',
+      emoji: '🎮',
+      href: '/catalog?category=consoles',
+    },
+    {
+      title: 'Розумний годинник',
+      subtitle: 'Фітнес і стиль',
+      badge: 'Новинки',
+      badgeColor: '#0d9488',
+      bg: 'linear-gradient(145deg, #0a1a1a 0%, #134e4a 100%)',
+      emoji: '⌚',
+      href: '/catalog?category=watches',
+    },
+  ],
 ];
 
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
-  const addItem = useCartStore((s) => s.addItem);
-
   const next = useCallback(() => setCurrent((c) => (c + 1) % slides.length), []);
   const prev = () => setCurrent((c) => (c - 1 + slides.length) % slides.length);
 
   useEffect(() => {
-    const timer = setInterval(next, 5000);
+    const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
   }, [next]);
 
-  const { product, bg } = slides[current];
+  const cards = slides[current];
 
   return (
-    <div className="relative rounded-lg overflow-hidden h-[360px] md:h-[420px]" style={{ background: bg }}>
-      {/* Content */}
-      <div className="h-full flex items-center justify-between px-8 md:px-16">
-        <div className="max-w-md">
-          {product.badge && (
-            <span
-              className="inline-block text-white text-[11px] font-bold px-3 py-1 mb-4 uppercase tracking-wider"
-              style={{
-                background: 'var(--accent)',
-                clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
-              }}
+    <div>
+      <div className="relative">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          {cards.map((card, i) => (
+            <Link
+              key={i}
+              href={card.href}
+              className="relative h-[200px] md:h-[280px] rounded-xl overflow-hidden flex flex-col justify-between p-4 md:p-5 group hover:-translate-y-1 transition-transform duration-200"
+              style={{ background: card.bg }}
             >
-              {product.badge === 'new' ? 'Новинка' : product.badge === 'hit' ? 'Хіт продажів' : 'Знижка'}
-            </span>
-          )}
-          <h2 className="text-3xl md:text-4xl font-bold leading-snug mb-3">
-            {product.name.split(' ').slice(0, 3).join(' ')}<br />
-            <span className="text-[--accent]">{product.name.split(' ').slice(3).join(' ')}</span>
-          </h2>
-          <p className="text-[--muted] text-[15px] mb-5 leading-relaxed">
-            {product.specs.slice(0, 2).join(' · ')}
-          </p>
-          <div className="flex items-baseline gap-3 mb-6">
-            <span className="text-[28px] font-bold">
-              {product.price.toLocaleString('uk-UA')} ₴
-            </span>
-            {product.oldPrice && (
-              <span className="text-lg text-[--old-price] line-through">
-                {product.oldPrice.toLocaleString('uk-UA')} ₴
+              {/* Badge */}
+              <span
+                className="self-start text-white text-[11px] font-bold px-2.5 py-1 rounded-full"
+                style={{ background: card.badgeColor }}
+              >
+                {card.badge}
               </span>
-            )}
-          </div>
-          <button
-            onClick={() => addItem(product)}
-            className="text-white text-sm font-bold px-8 py-3 hover:bg-[--accent-hover] transition-all duration-200 hover:-translate-y-0.5"
-            style={{
-              background: 'var(--accent)',
-              clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
-            }}
-          >
-            Купити зараз
-          </button>
+
+              {/* Title */}
+              <div>
+                <h3 className="text-white text-lg md:text-xl font-bold leading-tight">{card.title}</h3>
+                <p className="text-white/50 text-[12px] mt-0.5">{card.subtitle}</p>
+              </div>
+
+              {/* Emoji */}
+              <span className="absolute bottom-3 right-3 text-[64px] md:text-[80px] leading-none select-none opacity-85 group-hover:scale-110 transition-transform duration-200">
+                {card.emoji}
+              </span>
+            </Link>
+          ))}
         </div>
 
-        <div className="hidden md:flex items-center text-[120px] md:text-[150px] opacity-90 select-none pr-8">
-          {product.emoji}
-        </div>
+        {/* Arrows */}
+        <button
+          onClick={prev}
+          className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-[#f0f0f0] rounded-full flex items-center justify-center text-[#111] text-xl shadow-lg transition-all"
+        >
+          ‹
+        </button>
+        <button
+          onClick={next}
+          className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-[#f0f0f0] rounded-full flex items-center justify-center text-[#111] text-xl shadow-lg transition-all"
+        >
+          ›
+        </button>
       </div>
 
-      {/* Arrows */}
-      <button
-        onClick={prev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/8 border border-[--border] rounded flex items-center justify-center text-white text-xl hover:bg-white/15 transition-all"
-      >
-        ‹
-      </button>
-      <button
-        onClick={next}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/8 border border-[--border] rounded flex items-center justify-center text-white text-xl hover:bg-white/15 transition-all"
-      >
-        ›
-      </button>
-
       {/* Dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+      <div className="flex justify-center gap-2 mt-4">
         {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className="w-1.5 h-1.5 rounded-full transition-colors"
-            style={{ background: i === current ? 'white' : 'var(--muted)' }}
+            className="rounded-full transition-all duration-300"
+            style={{
+              width: i === current ? 24 : 8,
+              height: 8,
+              background: i === current ? 'var(--accent)' : '#ccc',
+            }}
           />
         ))}
       </div>

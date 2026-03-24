@@ -31,10 +31,10 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/product/${product.id}`}
-      className="group bg-[--card] border border-transparent hover:border-[--muted] rounded-md flex flex-col transition-all duration-300 relative overflow-hidden"
+      className="group bg-(--card) border border-transparent hover:border-(--muted) rounded-md flex flex-col transition-all duration-300 relative overflow-hidden"
     >
       {/* Image area */}
-      <div className="relative aspect-square flex items-center justify-center text-[80px] p-5 bg-[#222]">
+      <div className="relative aspect-square flex items-center justify-center text-[80px] p-5 bg-(--bg)">
         {product.emoji}
         {badge && (
           <span
@@ -48,7 +48,7 @@ export default function ProductCard({ product }: { product: Product }) {
           </span>
         )}
         {!product.inStock && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-[--muted] text-sm font-bold">
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-(--muted) text-sm font-bold">
             Немає в наявності
           </div>
         )}
@@ -61,11 +61,11 @@ export default function ProductCard({ product }: { product: Product }) {
             ★
           </span>
         ))}
-        <span className="text-[--muted] text-[11px] ml-1">({product.reviewCount})</span>
+        <span className="text-(--muted) text-[11px] ml-1">({product.reviewCount})</span>
       </div>
 
       {/* Title */}
-      <div className="text-[13px] font-bold text-[--muted] text-center px-3 py-1.5 leading-snug line-clamp-2 min-h-[40px]">
+      <div className="text-[13px] font-semibold text-(--text) text-center px-3 py-1.5 leading-snug line-clamp-2 min-h-[40px]">
         {product.name}
       </div>
 
@@ -75,7 +75,7 @@ export default function ProductCard({ product }: { product: Product }) {
           {product.colors.map((c) => (
             <span
               key={c}
-              className="w-4 h-4 rounded-full border border-white/20 inline-block"
+              className="w-4 h-4 rounded-full border border-(--border) inline-block"
               style={{ background: c }}
             />
           ))}
@@ -84,11 +84,11 @@ export default function ProductCard({ product }: { product: Product }) {
 
       {/* Price */}
       <div className="text-center px-3 pb-1">
-        <div className="text-[18px] font-bold text-[--text]">
+        <div className="text-[18px] font-bold text-(--text)">
           {product.price.toLocaleString('uk-UA')} ₴
         </div>
         {product.oldPrice && (
-          <div className="text-[12px] text-[--old-price] line-through mt-0.5">
+          <div className="text-[12px] text-(--old-price) line-through mt-0.5">
             {product.oldPrice.toLocaleString('uk-UA')} ₴
           </div>
         )}
@@ -102,8 +102,8 @@ export default function ProductCard({ product }: { product: Product }) {
           added
             ? 'bg-green-800'
             : product.inStock
-            ? 'bg-[--accent] hover:bg-[--accent-hover] hover:-translate-y-px active:translate-y-0'
-            : 'bg-[--border] cursor-not-allowed'
+            ? 'bg-(--accent) hover:bg-(--accent-hover) hover:-translate-y-px active:translate-y-0'
+            : 'bg-(--border) cursor-not-allowed'
         }`}
       >
         {added ? '✓ Додано!' : product.inStock ? 'В кошик' : 'Немає'}

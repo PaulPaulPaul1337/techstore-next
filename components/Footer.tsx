@@ -2,24 +2,24 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-[--card] border-t border-[--border] mt-16">
+    <footer className="bg-(--card) border-t border-(--border) mt-16">
       <div className="max-w-[1440px] mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
         {/* Brand */}
         <div>
           <div className="text-xl font-bold mb-3">
-            Tech<span className="text-[--accent]">Store</span>
+            Tech<span className="text-(--accent)">Store</span>
           </div>
-          <p className="text-[--muted] text-[13px] leading-relaxed mb-4">
+          <p className="text-(--muted) text-[13px] leading-relaxed mb-4">
             Офіційний магазин електроніки в Україні.<br />
             Смартфони, ноутбуки, аксесуари та сервіс.
           </p>
           <div className="text-lg font-bold mb-1">☎ 0 800 400 800</div>
-          <div className="text-[--muted] text-xs mb-4">Безкоштовно, щодня 9:00–21:00</div>
+          <div className="text-(--muted) text-xs mb-4">Безкоштовно, щодня 9:00–21:00</div>
           <div className="flex gap-2">
             {['📷', '✈️', '👤', '▶️'].map((icon, i) => (
               <button
                 key={i}
-                className="w-9 h-9 bg-[--bg] border border-[--border] rounded flex items-center justify-center text-[--muted] hover:text-[--text] hover:border-[--muted] transition-all"
+                className="w-9 h-9 bg-(--bg) border border-(--border) rounded flex items-center justify-center text-(--muted) hover:text-(--text) hover:border-(--muted) transition-all"
               >
                 {icon}
               </button>
@@ -33,7 +33,7 @@ export default function Footer() {
           <ul className="space-y-2.5">
             {['Як зробити замовлення', 'Доставка і оплата', 'Гарантія і повернення', 'Trade-In', 'Розстрочка 0%'].map((item) => (
               <li key={item}>
-                <Link href="#" className="text-[--muted] text-[13px] hover:text-[--text] transition-colors">{item}</Link>
+                <Link href="#" className="text-(--muted) text-[13px] hover:text-(--text) transition-colors">{item}</Link>
               </li>
             ))}
           </ul>
@@ -45,7 +45,7 @@ export default function Footer() {
           <ul className="space-y-2.5">
             {['Про нас', 'Магазини', 'Сервісний центр', 'Вакансії', 'Контакти'].map((item) => (
               <li key={item}>
-                <Link href="#" className="text-[--muted] text-[13px] hover:text-[--text] transition-colors">{item}</Link>
+                <Link href="#" className="text-(--muted) text-[13px] hover:text-(--text) transition-colors">{item}</Link>
               </li>
             ))}
           </ul>
@@ -59,7 +59,7 @@ export default function Footer() {
               <li key={item}>
                 <Link
                   href={`/catalog?q=${encodeURIComponent(item)}`}
-                  className="text-[--muted] text-[13px] hover:text-[--text] transition-colors"
+                  className="text-(--muted) text-[13px] hover:text-(--text) transition-colors"
                 >
                   {item}
                 </Link>
@@ -69,8 +69,8 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-[--border]">
-        <div className="max-w-[1440px] mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between text-[--muted] text-xs gap-2">
+      <div className="border-t border-(--border)">
+        <div className="max-w-[1440px] mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between text-(--muted) text-xs gap-2">
           <span>© 2026 TechStore. Всі права захищені.</span>
           <span>support@techstore.ua &nbsp;|&nbsp; м. Київ, вул. Хрещатик 1</span>
         </div>
