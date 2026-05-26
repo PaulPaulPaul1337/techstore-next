@@ -4,15 +4,32 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useCartStore } from '@/store/cartStore';
+import { useWishlistStore } from '@/store/wishlistStore';
+import { useCompareStore } from '@/store/compareStore';
+import { useAuthStore } from '@/store/authStore';
 import { categoryLabels, categoryEmojis, Category } from '@/data/products';
 
 const categories = Object.keys(categoryLabels) as Category[];
+
+function Badge({ count }: { count: number }) {
+  if (count === 0) return null;
+  return (
+    <span className="absolute -top-1 -right-1 bg-(--accent) text-white text-[9px] font-bold w-[15px] h-[15px] rounded-full flex items-center justify-center leading-none">
+      {count > 9 ? '9+' : count}
+    </span>
+  );
+}
 
 export default function Header() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+
   const totalCount = useCartStore((s) => s.totalCount());
+  const wishCount = useWishlistStore((s) => s.count());
+  const compareCount = useCompareStore((s) => s.count());
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -28,10 +45,10 @@ export default function Header() {
       <div className="bg-[#1c1c1c] text-[#999] text-xs py-2 hidden md:block">
         <div className="max-w-[1440px] mx-auto px-4 flex justify-between items-center">
           <div className="flex gap-6">
-            <Link href="#" className="hover:text-white transition-colors">Доставка і оплата</Link>
-            <Link href="#" className="hover:text-white transition-colors">Гарантія і повернення</Link>
-            <Link href="#" className="hover:text-white transition-colors">Сервісний центр</Link>
-            <Link href="#" className="hover:text-white transition-colors">Акції</Link>
+            <Link href="/delivery" className="hover:text-white transition-colors">Доставка і оплата</Link>
+            <Link href="/warranty" className="hover:text-white transition-colors">Гарантія і повернення</Link>
+            <Link href="/contacts" className="hover:text-white transition-colors">Сервісний центр</Link>
+            <Link href="/catalog?badge=sale" className="hover:text-white transition-colors">Акції</Link>
           </div>
           <div className="flex gap-6 items-center">
             <span className="text-white font-medium">0 800 000 000</span>
@@ -76,25 +93,62 @@ export default function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-0.5 ml-auto">
-            <button className="hidden md:flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors">
-              <span className="text-lg leading-none">⚖️</span>
+            <Link
+              href="/compare"
+              className="hidden md:flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors relative"
+            >
+              <span className="text-lg leading-none relative">
+                ⚖️
+                <Badge count={compareCount} />
+              </span>
               <span className="text-[10px] mt-0.5">Порівняння</span>
-            </button>
-            <button className="hidden md:flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors">
-              <span className="text-lg leading-none">♡</span>
+            </Link>
+
+            <Link
+              href="/wishlist"
+              className="hidden md:flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors relative"
+            >
+              <span className="text-lg leading-none relative">
+                ♡
+                <Badge count={wishCount} />
+              </span>
               <span className="text-[10px] mt-0.5">Обране</span>
-            </button>
+            </Link>
+
+            {user ? (
+              <div className="hidden md:flex items-center gap-1">
+                <Link
+                  href={user.isAdmin ? '/admin' : '/account'}
+                  className="flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors"
+                >
+                  <span className="text-lg leading-none">👤</span>
+                  <span className="text-[10px] mt-0.5 max-w-[60px] truncate">{user.name.split(' ')[0]}</span>
+                </Link>
+                <button
+                  onClick={logout}
+                  className="text-[10px] text-[#666] hover:text-[#aaa] transition-colors px-1"
+                  title="Вийти"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden md:flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors"
+              >
+                <span className="text-lg leading-none">👤</span>
+                <span className="text-[10px] mt-0.5">Увійти</span>
+              </Link>
+            )}
+
             <Link
               href="/cart"
               className="flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors"
             >
               <span className="text-lg leading-none relative">
                 🛒
-                {totalCount > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-(--accent) text-white text-[9px] font-bold w-[15px] h-[15px] rounded-full flex items-center justify-center leading-none">
-                    {totalCount > 9 ? '9+' : totalCount}
-                  </span>
-                )}
+                <Badge count={totalCount} />
               </span>
               <span className="text-[10px] mt-0.5">Кошик</span>
             </Link>

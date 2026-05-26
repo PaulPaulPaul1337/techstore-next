@@ -4,7 +4,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import ProductCard from '@/components/ProductCard';
-import { products, categoryLabels, categoryEmojis, Category } from '@/data/products';
+import { categoryLabels, categoryEmojis, Category } from '@/data/products';
+import type { Product } from '@/data/products';
 
 const categories = Object.keys(categoryLabels) as Category[];
 
@@ -18,16 +19,28 @@ const sortOptions = [
 
 function CatalogContent() {
   const searchParams = useSearchParams();
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [dbLoaded, setDbLoaded] = useState(false);
 
   const [category, setCategory] = useState<Category | ''>((searchParams.get('category') as Category) || '');
   const [search, setSearch] = useState(searchParams.get('q') || '');
   const [badge, setBadge] = useState(searchParams.get('badge') || '');
+
+  // Fetch all products from the DB via API on mount
+  useEffect(() => {
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((data) => { setAllProducts(data); setDbLoaded(true); })
+      .catch(() => setDbLoaded(true));
+  }, []);
 
   useEffect(() => {
     setCategory((searchParams.get('category') as Category) || '');
     setSearch(searchParams.get('q') || '');
     setBadge(searchParams.get('badge') || '');
   }, [searchParams]);
+
+  const products = allProducts;
   const [sort, setSort] = useState('default');
   const [maxPrice, setMaxPrice] = useState(100000);
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -194,16 +207,16 @@ function CatalogContent() {
             </select>
           </div>
 
-          {filtered.length === 0 ? (
+          {!dbLoaded ? (
+            <div className="text-center py-20 text-(--muted)">
+              <div className="text-4xl mb-3 animate-pulse">⏳</div>
+              <div className="text-sm">Завантаження товарів...</div>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="text-center py-20 text-(--muted)">
               <div className="text-5xl mb-4">🔍</div>
               <div className="text-lg font-semibold mb-2">Нічого не знайдено</div>
-              <button
-                onClick={resetFilters}
-                className="text-(--accent) underline text-sm hover:opacity-80"
-              >
-                Скинути фільтри
-              </button>
+              <button onClick={resetFilters} className="text-(--accent) underline text-sm hover:opacity-80">Скинути фільтри</button>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">

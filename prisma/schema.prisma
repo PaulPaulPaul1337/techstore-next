@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Category {
+  smartphones
+  laptops
+  monitors
+  headphones
+  cameras
+  consoles
+  watches
+  accessories
+}
+
+enum Badge {
+  new
+  hit
+  sale
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  brand       String
+  category    Category
+  price       Int
+  oldPrice    Int?
+  emoji       String    @default("📦")
+  badge       Badge?
+  specs       String[]
+  description String
+  inStock     Boolean   @default(true)
+  colors      String[]
+  rating      Int       @default(5)
+  reviewCount Int       @default(0)
+  isStatic    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+}

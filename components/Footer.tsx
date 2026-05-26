@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-(--card) border-t border-(--border) mt-16">
+    <footer className="bg-(--card) border-t border-(--border) mt-12">
       <div className="max-w-[1440px] mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
         {/* Brand */}
         <div>
@@ -13,27 +13,22 @@ export default function Footer() {
             Офіційний магазин електроніки в Україні.<br />
             Смартфони, ноутбуки, аксесуари та сервіс.
           </p>
-          <div className="text-lg font-bold mb-1">☎ 0 800 400 800</div>
+          <div className="text-lg font-bold mb-1">☎ 0 800 000 000</div>
           <div className="text-(--muted) text-xs mb-4">Безкоштовно, щодня 9:00–21:00</div>
-          <div className="flex gap-2">
-            {['📷', '✈️', '👤', '▶️'].map((icon, i) => (
-              <button
-                key={i}
-                className="w-9 h-9 bg-(--bg) border border-(--border) rounded flex items-center justify-center text-(--muted) hover:text-(--text) hover:border-(--muted) transition-all"
-              >
-                {icon}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Column */}
         <div>
           <h4 className="font-bold mb-4">Покупцям</h4>
           <ul className="space-y-2.5">
-            {['Як зробити замовлення', 'Доставка і оплата', 'Гарантія і повернення', 'Trade-In', 'Розстрочка 0%'].map((item) => (
-              <li key={item}>
-                <Link href="#" className="text-(--muted) text-[13px] hover:text-(--text) transition-colors">{item}</Link>
+            {[
+              { label: 'Доставка і оплата', href: '/delivery' },
+              { label: 'Гарантія і повернення', href: '/warranty' },
+              { label: 'Контакти', href: '/contacts' },
+              { label: 'Акції', href: '/catalog?badge=sale' },
+            ].map(({ label, href }) => (
+              <li key={href}>
+                <Link href={href} className="text-(--muted) text-[13px] hover:text-(--accent) transition-colors">{label}</Link>
               </li>
             ))}
           </ul>
@@ -43,9 +38,13 @@ export default function Footer() {
         <div>
           <h4 className="font-bold mb-4">Компанія</h4>
           <ul className="space-y-2.5">
-            {['Про нас', 'Магазини', 'Сервісний центр', 'Вакансії', 'Контакти'].map((item) => (
-              <li key={item}>
-                <Link href="#" className="text-(--muted) text-[13px] hover:text-(--text) transition-colors">{item}</Link>
+            {[
+              { label: 'Про нас', href: '/about' },
+              { label: 'Контакти', href: '/contacts' },
+              { label: 'Сервісний центр', href: '/warranty' },
+            ].map(({ label, href }) => (
+              <li key={href}>
+                <Link href={href} className="text-(--muted) text-[13px] hover:text-(--accent) transition-colors">{label}</Link>
               </li>
             ))}
           </ul>
@@ -55,11 +54,11 @@ export default function Footer() {
         <div>
           <h4 className="font-bold mb-4">Популярне</h4>
           <ul className="space-y-2.5">
-            {['iPhone 15 Pro', 'MacBook Air M3', 'Samsung Galaxy S24', 'PlayStation 5', 'AirPods Pro 2'].map((item) => (
+            {['iPhone', 'MacBook', 'Samsung Galaxy', 'PlayStation', 'AirPods'].map((item) => (
               <li key={item}>
                 <Link
                   href={`/catalog?q=${encodeURIComponent(item)}`}
-                  className="text-(--muted) text-[13px] hover:text-(--text) transition-colors"
+                  className="text-(--muted) text-[13px] hover:text-(--accent) transition-colors"
                 >
                   {item}
                 </Link>
