@@ -1,17 +1,25 @@
 'use client';
 
-// Providers — wraps the app to initialise client-side state on mount.
-// Currently: restores the auth session from the JWT cookie.
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
+import { useThemeStore } from '@/store/themeStore';
+import AuthModal from '@/components/AuthModal';
+import FloatingContact from '@/components/FloatingContact';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const init = useAuthStore((s) => s.init);
+  const initTheme = useThemeStore((s) => s.init);
 
-  // On first render, check if there's a valid session cookie
   useEffect(() => {
     init();
-  }, [init]);
+    initTheme();
+  }, [init, initTheme]);
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <AuthModal />
+      <FloatingContact />
+    </>
+  );
 }

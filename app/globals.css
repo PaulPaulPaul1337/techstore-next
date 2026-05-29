@@ -13,6 +13,17 @@
   --star: #f5a623;
 }
 
+html.dark {
+  --bg: #111111;
+  --card: #1e1e1e;
+  --accent: #e03335;
+  --accent-hover: #c42a2c;
+  --border: #2e2e2e;
+  --text: #f0f0f0;
+  --muted: #888888;
+  --old-price: #666666;
+}
+
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--text);

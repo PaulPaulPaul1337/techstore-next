@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCompareStore } from '@/store/compareStore';
 import { useAuthStore } from '@/store/authStore';
-import { categoryLabels, categoryEmojis, Category } from '@/data/products';
-
-const categories = Object.keys(categoryLabels) as Category[];
+import { useAuthModalStore } from '@/store/authModalStore';
+import { useThemeStore } from '@/store/themeStore';
+import CatalogMenu from '@/components/CatalogMenu';
 
 function Badge({ count }: { count: number }) {
   if (count === 0) return null;
@@ -24,12 +24,29 @@ export default function Header() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function openMenu() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setMenuOpen(true);
+  }
+  function closeMenu() { setMenuOpen(false); }
+  function scheduleClose() {
+    closeTimer.current = setTimeout(closeMenu, 120);
+  }
+  function cancelClose() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  }
 
   const totalCount = useCartStore((s) => s.totalCount());
   const wishCount = useWishlistStore((s) => s.count());
   const compareCount = useCompareStore((s) => s.count());
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const openLogin = useAuthModalStore((s) => s.openLogin);
+  const openAccount = useAuthModalStore((s) => s.openAccount);
+  const dark = useThemeStore((s) => s.dark);
+  const toggleTheme = useThemeStore((s) => s.toggle);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -53,6 +70,17 @@ export default function Header() {
           <div className="flex gap-6 items-center">
             <span className="text-white font-medium">0 800 000 000</span>
             <span>м. Київ</span>
+            <button
+              onClick={toggleTheme}
+              title={dark ? 'Світла тема' : 'Темна тема'}
+              className="w-8 h-[18px] rounded-full relative transition-colors duration-300 flex items-center shrink-0"
+              style={{ background: dark ? '#c42a2c' : '#444' }}
+            >
+              <span
+                className="absolute w-[14px] h-[14px] bg-white rounded-full shadow transition-transform duration-300"
+                style={{ transform: dark ? 'translateX(17px)' : 'translateX(2px)' }}
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -68,7 +96,8 @@ export default function Header() {
 
           {/* Catalog button */}
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
+            onMouseEnter={openMenu}
+            onMouseLeave={scheduleClose}
             className="hidden md:flex items-center gap-2 bg-(--accent) text-white px-5 h-10 text-sm font-bold whitespace-nowrap hover:bg-(--accent-hover) transition-colors rounded"
           >
             ☰ Каталог
@@ -95,105 +124,67 @@ export default function Header() {
           <div className="flex items-center gap-0.5 ml-auto">
             <Link
               href="/compare"
-              className="hidden md:flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors relative"
+              className="hidden md:flex flex-col items-center px-3 py-1 text-white hover:text-white transition-colors relative"
             >
               <span className="text-lg leading-none relative">
                 ⚖️
                 <Badge count={compareCount} />
               </span>
-              <span className="text-[10px] mt-0.5">Порівняння</span>
+              <span className="text-[10px] mt-0.5 text-white">Порівняння</span>
             </Link>
 
             <Link
               href="/wishlist"
-              className="hidden md:flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors relative"
+              className="hidden md:flex flex-col items-center px-3 py-1 text-white hover:text-white transition-colors relative"
             >
-              <span className="text-lg leading-none relative">
+              <span className={`text-lg leading-none relative ${dark ? 'text-white' : 'text-[#111]'}`}>
                 ♡
                 <Badge count={wishCount} />
               </span>
-              <span className="text-[10px] mt-0.5">Обране</span>
+              <span className="text-[10px] mt-0.5 text-white">Обране</span>
             </Link>
 
             {user ? (
-              <div className="hidden md:flex items-center gap-1">
-                <Link
-                  href={user.isAdmin ? '/admin' : '/account'}
-                  className="flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors"
-                >
-                  <span className="text-lg leading-none">👤</span>
-                  <span className="text-[10px] mt-0.5 max-w-[60px] truncate">{user.name.split(' ')[0]}</span>
-                </Link>
-                <button
-                  onClick={logout}
-                  className="text-[10px] text-[#666] hover:text-[#aaa] transition-colors px-1"
-                  title="Вийти"
-                >
-                  ✕
-                </button>
-              </div>
-            ) : (
-              <Link
-                href="/login"
-                className="hidden md:flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors"
+              <button
+                onClick={openAccount}
+                className="hidden md:flex flex-col items-center px-3 py-1 text-white hover:text-white transition-colors"
               >
                 <span className="text-lg leading-none">👤</span>
-                <span className="text-[10px] mt-0.5">Увійти</span>
-              </Link>
+                <span className="text-[10px] mt-0.5 max-w-[60px] truncate text-white">{user.name.split(' ')[0]}</span>
+              </button>
+            ) : (
+              <button
+                onClick={openLogin}
+                className="hidden md:flex flex-col items-center px-3 py-1 text-white hover:text-white transition-colors"
+              >
+                <span className="text-lg leading-none">👤</span>
+                <span className="text-[10px] mt-0.5 text-white">Увійти</span>
+              </button>
             )}
 
             <Link
               href="/cart"
-              className="flex flex-col items-center px-3 py-1 text-[#aaa] hover:text-white transition-colors"
+              className="flex flex-col items-center px-3 py-1 text-white hover:text-white transition-colors"
             >
               <span className="text-lg leading-none relative">
                 🛒
                 <Badge count={totalCount} />
               </span>
-              <span className="text-[10px] mt-0.5">Кошик</span>
+              <span className="text-[10px] mt-0.5 text-white">Кошик</span>
             </Link>
           </div>
 
           {/* Mobile burger */}
           <button
             className="md:hidden ml-2 text-white text-2xl"
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={menuOpen ? closeMenu : openMenu}
           >
             ☰
           </button>
         </div>
       </header>
 
-      {/* Catalog / mobile overlay */}
-      {menuOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60"
-          onClick={() => setMenuOpen(false)}
-        >
-          <div
-            className="absolute left-0 top-0 bottom-0 w-72 bg-white flex flex-col overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="text-[15px] font-bold px-5 py-4 border-b border-[#eee] text-[#111]">
-              Каталог товарів
-            </div>
-            {categories.map((cat) => (
-              <Link
-                key={cat}
-                href={`/catalog?category=${cat}`}
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-between px-5 py-3 text-[#333] hover:bg-[#f5f5f5] hover:text-[--accent] transition-colors border-b border-[#f0f0f0] text-[14px] font-medium"
-              >
-                <span className="flex items-center gap-3">
-                  <span className="text-lg w-6 text-center">{categoryEmojis[cat]}</span>
-                  {categoryLabels[cat]}
-                </span>
-                <span className="text-[#ccc] text-lg">›</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+      <CatalogMenu isOpen={menuOpen} onClose={closeMenu} onMouseEnter={cancelClose} onMouseLeave={scheduleClose} />
     </>
   );
 }

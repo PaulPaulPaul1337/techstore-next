@@ -112,12 +112,12 @@ export default function HeroSlider() {
             <Link
               key={i}
               href={card.href}
-              className="relative h-[200px] md:h-[280px] rounded-xl overflow-hidden flex flex-col justify-between p-4 md:p-5 group hover:-translate-y-1 transition-transform duration-200"
+              className="relative h-[400px] md:h-[560px] rounded-xl overflow-hidden flex flex-col justify-between p-5 md:p-8 group hover:-translate-y-1 transition-transform duration-200"
               style={{ background: card.bg }}
             >
               {/* Badge */}
               <span
-                className="self-start text-white text-[11px] font-bold px-2.5 py-1 rounded-full"
+                className="self-start text-white text-[13px] font-bold px-3 py-1.5 rounded-full"
                 style={{ background: card.badgeColor }}
               >
                 {card.badge}
@@ -125,12 +125,12 @@ export default function HeroSlider() {
 
               {/* Title */}
               <div>
-                <h3 className="text-white text-lg md:text-xl font-bold leading-tight">{card.title}</h3>
-                <p className="text-white/50 text-[12px] mt-0.5">{card.subtitle}</p>
+                <h3 className="text-white text-2xl md:text-3xl font-bold leading-tight">{card.title}</h3>
+                <p className="text-white/50 text-[14px] mt-1">{card.subtitle}</p>
               </div>
 
               {/* Emoji */}
-              <span className="absolute bottom-3 right-3 text-[64px] md:text-[80px] leading-none select-none opacity-85 group-hover:scale-110 transition-transform duration-200">
+              <span className="absolute bottom-5 right-5 text-[120px] md:text-[160px] leading-none select-none opacity-85 group-hover:scale-110 transition-transform duration-200">
                 {card.emoji}
               </span>
             </Link>
