@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
 
-type PromoCard = {
+interface Slide {
+  id: string;
   title: string;
   subtitle: string;
   badge: string;
@@ -11,106 +13,44 @@ type PromoCard = {
   bg: string;
   emoji: string;
   href: string;
-};
-
-const slides: PromoCard[][] = [
-  [
-    {
-      title: 'Смартфони',
-      subtitle: 'Флагмани та бюджетні',
-      badge: 'до -20%',
-      badgeColor: '#2563eb',
-      bg: 'linear-gradient(145deg, #0f172a 0%, #1e1b4b 100%)',
-      emoji: '📱',
-      href: '/catalog?category=smartphones',
-    },
-    {
-      title: 'Ноутбуки',
-      subtitle: 'Для роботи і навчання',
-      badge: 'до -17%',
-      badgeColor: '#7c3aed',
-      bg: 'linear-gradient(145deg, #1a1a0a 0%, #14532d 100%)',
-      emoji: '💻',
-      href: '/catalog?category=laptops',
-    },
-    {
-      title: 'Навушники',
-      subtitle: 'Hi-Fi та шумодав',
-      badge: 'до -30%',
-      badgeColor: '#db2777',
-      bg: 'linear-gradient(145deg, #1c0a0a 0%, #450a0a 100%)',
-      emoji: '🎧',
-      href: '/catalog?category=headphones',
-    },
-    {
-      title: 'Аксесуари',
-      subtitle: 'Все для гаджетів',
-      badge: 'до -44%',
-      badgeColor: '#059669',
-      bg: 'linear-gradient(145deg, #0a1a0a 0%, #052e16 100%)',
-      emoji: '🖱️',
-      href: '/catalog?category=accessories',
-    },
-  ],
-  [
-    {
-      title: 'Монітори',
-      subtitle: '4K та ігрові',
-      badge: 'до -25%',
-      badgeColor: '#ea580c',
-      bg: 'linear-gradient(145deg, #1a0f00 0%, #431407 100%)',
-      emoji: '🖥️',
-      href: '/catalog?category=monitors',
-    },
-    {
-      title: 'Камери',
-      subtitle: 'Фото і відео',
-      badge: 'до -15%',
-      badgeColor: '#0891b2',
-      bg: 'linear-gradient(145deg, #0a1520 0%, #0c4a6e 100%)',
-      emoji: '📷',
-      href: '/catalog?category=cameras',
-    },
-    {
-      title: 'Ігрова зона',
-      subtitle: 'Консолі та геймпади',
-      badge: 'Хіт!',
-      badgeColor: '#dc2626',
-      bg: 'linear-gradient(145deg, #1a0a1a 0%, #3b0764 100%)',
-      emoji: '🎮',
-      href: '/catalog?category=consoles',
-    },
-    {
-      title: 'Розумний годинник',
-      subtitle: 'Фітнес і стиль',
-      badge: 'Новинки',
-      badgeColor: '#0d9488',
-      bg: 'linear-gradient(145deg, #0a1a1a 0%, #134e4a 100%)',
-      emoji: '⌚',
-      href: '/catalog?category=watches',
-    },
-  ],
-];
+  imageUrl: string | null;
+}
 
 export default function HeroSlider() {
+  const [slides, setSlides] = useState<Slide[]>([]);
   const [current, setCurrent] = useState(0);
-  const next = useCallback(() => setCurrent((c) => (c + 1) % slides.length), []);
-  const prev = () => setCurrent((c) => (c - 1 + slides.length) % slides.length);
 
   useEffect(() => {
+    fetch('/api/slides').then(r => r.json()).then((data: Slide[]) => {
+      if (Array.isArray(data) && data.length > 0) setSlides(data);
+    }).catch(() => {});
+  }, []);
+
+  // Group slides into pages of 4
+  const pages = slides.length > 0
+    ? Array.from({ length: Math.ceil(slides.length / 4) }, (_, i) => slides.slice(i * 4, i * 4 + 4))
+    : [];
+
+  const next = useCallback(() => setCurrent(c => (c + 1) % Math.max(pages.length, 1)), [pages.length]);
+  const prev = () => setCurrent(c => (c - 1 + Math.max(pages.length, 1)) % Math.max(pages.length, 1));
+
+  useEffect(() => {
+    if (pages.length <= 1) return;
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [next, pages.length]);
 
-  const cards = slides[current];
+  if (slides.length === 0) return null;
+
+  const cards = pages[current] ?? [];
 
   return (
     <div>
       <div className="relative">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-          {cards.map((card, i) => (
+          {cards.map((card) => (
             <Link
-              key={i}
+              key={card.id}
               href={card.href}
               className="relative h-[400px] md:h-[560px] rounded-xl overflow-hidden flex flex-col justify-between p-5 md:p-8 group hover:-translate-y-1 transition-transform duration-200"
               style={{ background: card.bg }}
@@ -129,44 +69,48 @@ export default function HeroSlider() {
                 <p className="text-white/50 text-[14px] mt-1">{card.subtitle}</p>
               </div>
 
-              {/* Emoji */}
-              <span className="absolute bottom-5 right-5 text-[120px] md:text-[160px] leading-none select-none opacity-85 group-hover:scale-110 transition-transform duration-200">
-                {card.emoji}
-              </span>
+              {/* Image or emoji */}
+              {card.imageUrl ? (
+                <img
+                  src={card.imageUrl}
+                  alt={card.title}
+                  className="absolute bottom-0 right-0 h-[55%] object-contain opacity-90 group-hover:scale-105 transition-transform duration-200"
+                />
+              ) : (
+                <span className="absolute bottom-5 right-5 text-[120px] md:text-[160px] leading-none select-none opacity-85 group-hover:scale-110 transition-transform duration-200">
+                  {card.emoji}
+                </span>
+              )}
             </Link>
           ))}
         </div>
 
-        {/* Arrows */}
-        <button
-          onClick={prev}
-          className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-[#f0f0f0] rounded-full flex items-center justify-center text-[#111] text-xl shadow-lg transition-all"
-        >
-          ‹
-        </button>
-        <button
-          onClick={next}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-[#f0f0f0] rounded-full flex items-center justify-center text-[#111] text-xl shadow-lg transition-all"
-        >
-          ›
-        </button>
+        {pages.length > 1 && (
+          <>
+            <button
+              onClick={prev}
+              className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-[#f0f0f0] rounded-full flex items-center justify-center text-[#111] text-xl shadow-lg transition-all"
+            >‹</button>
+            <button
+              onClick={next}
+              className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-[#f0f0f0] rounded-full flex items-center justify-center text-[#111] text-xl shadow-lg transition-all"
+            >›</button>
+          </>
+        )}
       </div>
 
-      {/* Dots */}
-      <div className="flex justify-center gap-2 mt-4">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className="rounded-full transition-all duration-300"
-            style={{
-              width: i === current ? 24 : 8,
-              height: 8,
-              background: i === current ? 'var(--accent)' : '#ccc',
-            }}
-          />
-        ))}
-      </div>
+      {pages.length > 1 && (
+        <div className="flex justify-center gap-2 mt-4">
+          {pages.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              className="rounded-full transition-all duration-300"
+              style={{ width: i === current ? 24 : 8, height: 8, background: i === current ? 'var(--accent)' : '#ccc' }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
