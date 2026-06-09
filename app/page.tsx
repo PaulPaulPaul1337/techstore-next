@@ -1,5 +1,5 @@
-// Server Component — fetches products directly from PostgreSQL via Prisma
-// No API call needed here since this code runs on the server
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 import HeroSlider from '@/components/HeroSlider';
 import ProductCard from '@/components/ProductCard';

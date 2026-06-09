@@ -2,13 +2,12 @@
 
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { categoryLabels, categoryEmojis } from '@/data/products';
 import { useCartStore } from '@/store/cartStore';
 import ProductCard from '@/components/ProductCard';
 import ReviewsSection from '@/components/ReviewsSection';
 
-interface Product {
+interface DBProduct {
   id: string;
   name: string;
   brand: string;
@@ -28,10 +27,9 @@ interface Product {
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [similar, setSimilar] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [notFoundFlag, setNotFoundFlag] = useState(false);
+  const [product, setProduct] = useState<DBProduct | null>(null);
+  const [similar, setSimilar] = useState<DBProduct[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ok' | 'notfound'>('loading');
 
   const addItem = useCartStore((s) => s.addItem);
   const [added, setAdded] = useState(false);
@@ -39,42 +37,53 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [qty, setQty] = useState(1);
 
   useEffect(() => {
+    setStatus('loading');
     fetch(`/api/products/${id}`)
       .then((r) => {
-        if (r.status === 404) { setNotFoundFlag(true); setLoading(false); return null; }
+        if (!r.ok) { setStatus('notfound'); return null; }
         return r.json();
       })
-      .then((data) => {
+      .then((data: DBProduct | null) => {
         if (!data) return;
         setProduct(data);
         setSelectedColor(data.colors?.[0] ?? null);
-        setLoading(false);
-        // Fetch similar
+        setStatus('ok');
         fetch(`/api/products?category=${data.category}`)
           .then((r) => r.json())
-          .then((all: Product[]) => setSimilar(all.filter((p) => p.id !== data.id).slice(0, 4)));
+          .then((all: DBProduct[]) =>
+            setSimilar(all.filter((p) => p.id !== data.id).slice(0, 4))
+          )
+          .catch(() => {});
       })
-      .catch(() => { setNotFoundFlag(true); setLoading(false); });
+      .catch(() => setStatus('notfound'));
   }, [id]);
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-[40vh] text-(--muted)">Завантаження...</div>
+  if (status === 'loading') return (
+    <div className="flex items-center justify-center min-h-[40vh] text-(--muted) text-sm">
+      Завантаження...
+    </div>
   );
-  if (notFoundFlag) return notFound();
-  if (!product) return null;
 
+  if (status === 'notfound' || !product) return (
+    <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
+      <div className="text-5xl">😕</div>
+      <p className="text-lg font-bold">Товар не знайдено</p>
+      <Link href="/catalog" className="text-(--accent) hover:underline text-sm">← До каталогу</Link>
+    </div>
+  );
+
+  const cat = product.category as keyof typeof categoryLabels;
   const discount = product.oldPrice
     ? Math.round((1 - product.price / product.oldPrice) * 100)
     : null;
 
   function handleAdd() {
-    if (!product || !product.inStock) return;
-    for (let i = 0; i < qty; i++) addItem(product as Parameters<typeof addItem>[0]);
+    if (!product!.inStock) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (let i = 0; i < qty; i++) addItem(product as any);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }
-
-  const cat = product.category as keyof typeof categoryLabels;
 
   return (
     <div className="max-w-[1440px] mx-auto px-4 py-6">
@@ -96,10 +105,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           {discount && (
             <span
               className="absolute top-4 left-4 text-white text-[13px] font-bold px-3 py-1.5"
-              style={{
-                background: 'var(--accent)',
-                clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
-              }}
+              style={{ background: 'var(--accent)', clipPath: 'polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))' }}
             >
               −{discount}%
             </span>
@@ -113,7 +119,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <h1 className="text-2xl font-bold leading-snug">{product.name}</h1>
           </div>
 
-          {/* Rating */}
           <div className="flex items-center gap-2">
             <div className="flex gap-0.5">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -123,7 +128,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <span className="text-(--muted) text-sm">{product.reviewCount} відгуків</span>
           </div>
 
-          {/* Price */}
           <div className="flex items-baseline gap-3">
             <span className="text-4xl font-bold">{product.price.toLocaleString('uk-UA')} ₴</span>
             {product.oldPrice && (
@@ -131,20 +135,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             )}
           </div>
 
-          {/* Stock */}
           <div className={`text-sm font-semibold ${product.inStock ? 'text-green-400' : 'text-red-400'}`}>
             {product.inStock ? '✓ Є в наявності' : '✗ Немає в наявності'}
           </div>
 
-          {/* Colors */}
           {product.colors && product.colors.length > 1 && (
             <div>
               <div className="text-sm font-semibold text-(--muted) mb-2">Колір:</div>
               <div className="flex gap-2">
                 {product.colors.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setSelectedColor(c)}
+                  <button key={c} type="button" onClick={() => setSelectedColor(c)}
                     className="w-8 h-8 rounded-full transition-all"
                     style={{ background: c, outline: selectedColor === c ? '2px solid white' : '2px solid transparent', outlineOffset: 2 }}
                   />
@@ -153,15 +153,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
           )}
 
-          {/* Qty + Add to cart */}
           {product.inStock && (
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex items-center bg-(--card) border border-(--border) rounded overflow-hidden">
-                <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="w-10 h-11 text-xl text-(--muted) hover:text-(--text) transition-colors">−</button>
+                <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} className="w-10 h-11 text-xl text-(--muted) hover:text-(--text) transition-colors">−</button>
                 <span className="w-10 text-center font-bold">{qty}</span>
-                <button onClick={() => setQty((q) => q + 1)} className="w-10 h-11 text-xl text-(--muted) hover:text-(--text) transition-colors">+</button>
+                <button type="button" onClick={() => setQty((q) => q + 1)} className="w-10 h-11 text-xl text-(--muted) hover:text-(--text) transition-colors">+</button>
               </div>
               <button
+                type="button"
                 onClick={handleAdd}
                 className={`flex-1 h-11 font-bold text-white rounded transition-all duration-200 ${added ? 'bg-green-700' : 'bg-(--accent) hover:bg-(--accent-hover) hover:-translate-y-0.5'}`}
               >
@@ -173,7 +173,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
           )}
 
-          {/* Specs */}
           <div className="bg-(--card) rounded-lg p-4 mt-2">
             <h3 className="font-bold mb-3">Характеристики</h3>
             <ul className="space-y-2">
@@ -185,7 +184,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </ul>
           </div>
 
-          {/* Description */}
           <div>
             <h3 className="font-bold mb-2">Опис</h3>
             <p className="text-(--muted) text-sm leading-relaxed">{product.description}</p>
@@ -196,14 +194,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       {/* Reviews */}
       <ReviewsSection productId={product.id} />
 
-      {/* Similar products */}
+      {/* Similar */}
       {similar.length > 0 && (
         <section className="mt-12">
           <h2 className="text-xl font-bold mb-4">Схожі товари</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {similar.map((p) => (
-              <ProductCard key={p.id} product={p as Parameters<typeof ProductCard>[0]['product']} />
-            ))}
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            {similar.map((p) => <ProductCard key={p.id} product={p as any} />)}
           </div>
         </section>
       )}

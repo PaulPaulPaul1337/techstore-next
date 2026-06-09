@@ -21,7 +21,7 @@ function Stars({ value, onChange }: { value: number; onChange?: (v: number) => v
         return (
           <button
             key={i}
-            type={onChange ? 'button' : undefined}
+            type="button"
             onClick={() => onChange?.(i + 1)}
             onMouseEnter={() => onChange && setHovered(i + 1)}
             onMouseLeave={() => onChange && setHovered(0)}
@@ -63,9 +63,14 @@ export default function ReviewsSection({ productId }: { productId: string }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    setLoading(true);
     fetch(`/api/products/${productId}/reviews`)
       .then((r) => r.json())
-      .then((data) => { setReviews(data); setLoading(false); });
+      .then((data) => {
+        setReviews(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [productId]);
 
   async function handleSubmit(e: React.FormEvent) {

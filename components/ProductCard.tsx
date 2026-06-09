@@ -123,32 +123,34 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
       )}
 
-      {/* Price */}
-      <div className="text-center px-3 pb-1">
-        <div className="text-[18px] font-bold text-(--text)">
-          {product.price.toLocaleString('uk-UA')} ₴
-        </div>
-        {product.oldPrice && (
-          <div className="text-[12px] text-(--old-price) line-through mt-0.5">
-            {product.oldPrice.toLocaleString('uk-UA')} ₴
+      {/* Price + cart button */}
+      <div className="flex items-center justify-between px-3 pb-3 mt-auto pt-1">
+        <div>
+          <div className="text-[18px] font-bold text-(--text) leading-tight">
+            {product.price.toLocaleString('uk-UA')} ₴
           </div>
-        )}
-      </div>
+          {product.oldPrice && (
+            <div className="text-[11px] text-(--old-price) line-through">
+              {product.oldPrice.toLocaleString('uk-UA')} ₴
+            </div>
+          )}
+        </div>
 
-      {/* Button */}
-      <button
-        onClick={handleAdd}
-        disabled={!product.inStock}
-        className={`mx-3 mb-3 mt-2 h-8 text-[13px] font-bold rounded text-white transition-all duration-200 ${
-          added
-            ? 'bg-green-600'
-            : product.inStock
-            ? 'bg-(--accent) hover:bg-(--accent-hover) hover:-translate-y-px active:translate-y-0'
-            : 'bg-[#ccc] cursor-not-allowed'
-        }`}
-      >
-        {added ? '✓ Додано!' : product.inStock ? 'В кошик' : 'Немає'}
-      </button>
+        <button
+          onClick={handleAdd}
+          disabled={!product.inStock}
+          title={product.inStock ? 'В кошик' : 'Немає в наявності'}
+          className={`w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 transition-all duration-200 ${
+            added
+              ? 'bg-green-600 text-white scale-110'
+              : product.inStock
+              ? 'bg-(--accent) hover:bg-(--accent-hover) text-white hover:scale-110 active:scale-95'
+              : 'bg-(--border) text-(--muted) cursor-not-allowed'
+          }`}
+        >
+          {added ? '✓' : '🛒'}
+        </button>
+      </div>
     </Link>
   );
 }
