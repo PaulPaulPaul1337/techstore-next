@@ -1,10 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useCartStore } from '@/store/cartStore';
+import CheckoutModal from '@/components/CheckoutModal';
 
 export default function CartPage() {
   const { items, removeItem, updateQty, clearCart, totalPrice } = useCartStore();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   if (items.length === 0) {
     return (
@@ -117,7 +120,10 @@ export default function CartPage() {
               </div>
             </div>
 
-            <button className="w-full h-12 bg-(--accent) text-white font-bold rounded hover:bg-(--accent-hover) transition-all duration-200 hover:-translate-y-0.5 mb-3">
+            <button
+              onClick={() => setCheckoutOpen(true)}
+              className="w-full h-12 bg-(--accent) text-white font-bold rounded hover:bg-(--accent-hover) transition-all duration-200 hover:-translate-y-0.5 mb-3"
+            >
               Оформити замовлення
             </button>
 
@@ -132,15 +138,17 @@ export default function CartPage() {
             <div className="mt-5 pt-4 border-t border-(--border)">
               <div className="text-xs text-(--muted) mb-2 text-center">Способи оплати</div>
               <div className="flex justify-center gap-2 text-lg">
-                💳 🏦 📱
+                💳 📱 💵
               </div>
               <div className="text-[11px] text-(--muted) text-center mt-1.5">
-                Visa, Mastercard, Monobank, PrivatBank
+                Картка, Apple Pay / Google Pay, оплата при отриманні
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {checkoutOpen && <CheckoutModal onClose={() => setCheckoutOpen(false)} />}
     </div>
   );
 }
