@@ -4,8 +4,10 @@ import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { categoryLabels, categoryEmojis } from '@/data/products';
 import { useCartStore } from '@/store/cartStore';
+import { useViewHistoryStore } from '@/store/viewHistoryStore';
 import ProductCard from '@/components/ProductCard';
 import ReviewsSection from '@/components/ReviewsSection';
+import RecentlyViewed from '@/components/RecentlyViewed';
 
 interface DBProduct {
   id: string;
@@ -32,6 +34,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [status, setStatus] = useState<'loading' | 'ok' | 'notfound'>('loading');
 
   const addItem = useCartStore((s) => s.addItem);
+  const addView = useViewHistoryStore((s) => s.addView);
   const [added, setAdded] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
@@ -48,6 +51,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         setProduct(data);
         setSelectedColor(data.colors?.[0] ?? null);
         setStatus('ok');
+        addView(data.id);
         fetch(`/api/products?category=${data.category}`)
           .then((r) => r.json())
           .then((all: DBProduct[]) =>
@@ -56,7 +60,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           .catch(() => {});
       })
       .catch(() => setStatus('notfound'));
-  }, [id]);
+  }, [id, addView]);
 
   if (status === 'loading') return (
     <div className="flex items-center justify-center min-h-[40vh] text-(--muted) text-sm">
@@ -204,6 +208,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           </div>
         </section>
       )}
+
+      {/* Recently viewed */}
+      <RecentlyViewed excludeId={product.id} />
     </div>
   );
 }

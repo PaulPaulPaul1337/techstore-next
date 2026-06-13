@@ -78,3 +78,29 @@ model Review {
   createdAt DateTime @default(now())
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  userId          String?
+  customerName    String
+  phone           String
+  address         String
+  paymentMethod   String
+  status          String      @default("processing")
+  trackingNumber  String?
+  total           Int
+  createdAt       DateTime    @default(now())
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  name      String
+  emoji     String
+  price     Int
+  qty       Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}

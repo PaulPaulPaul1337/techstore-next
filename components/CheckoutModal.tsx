@@ -68,24 +68,47 @@ export default function CheckoutModal({ onClose }: { onClose: () => void }) {
     }
 
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setSubmitting(false);
 
-    const orderNumber = `TS-${Math.floor(100000 + Math.random() * 900000)}`;
-    const trackingNumber = `2045${Math.floor(1000000000 + Math.random() * 9000000000)}`;
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: name,
+        phone,
+        address,
+        paymentMethod: method,
+        total,
+        items: items.map(({ product, qty }) => ({
+          productId: product.id,
+          name: product.name,
+          emoji: product.emoji,
+          price: product.price,
+          qty,
+        })),
+      }),
+    });
+
+    if (!res.ok) {
+      setSubmitting(false);
+      setError('Помилка оформлення замовлення. Спробуйте ще раз');
+      return;
+    }
+
+    const order = await res.json();
+    setSubmitting(false);
 
     fetch('/api/sms/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         phone,
-        message: `TechStore: ваше замовлення ${orderNumber} оформлено! ТТН для відстеження: ${trackingNumber}`,
+        message: `TechStore: ваше замовлення ${order.orderNumber} оформлено! ТТН для відстеження: ${order.trackingNumber}`,
       }),
     }).catch(() => {});
 
     clearCart();
 
-    const query = new URLSearchParams({ order: orderNumber, tracking: trackingNumber, phone, total: String(total), sms: '1' });
+    const query = new URLSearchParams({ order: order.orderNumber, tracking: order.trackingNumber, phone, total: String(total), sms: '1' });
     router.push(`/order-success?${query.toString()}`);
   }
 

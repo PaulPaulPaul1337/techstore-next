@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { Product } from '@/data/products';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCompareStore } from '@/store/compareStore';
@@ -23,6 +24,9 @@ function Badge({ count }: { count: number }) {
 export default function Header() {
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -48,13 +52,47 @@ export default function Header() {
   const dark = useThemeStore((s) => s.dark);
   const toggleTheme = useThemeStore((s) => s.toggle);
 
-  function handleSearch(e: React.FormEvent) {
+  function handleSearch(e: React.SyntheticEvent) {
     e.preventDefault();
     if (query.trim()) {
       router.push(`/catalog?q=${encodeURIComponent(query.trim())}`);
       setQuery('');
+      setShowSuggestions(false);
     }
   }
+
+  function handleSuggestionClick(id: string) {
+    setQuery('');
+    setShowSuggestions(false);
+    router.push(`/product/${id}`);
+  }
+
+  // Debounced live search suggestions
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(() => {
+      fetch(`/api/products?q=${encodeURIComponent(q)}`)
+        .then((r) => r.json())
+        .then((data: Product[]) => setSuggestions(Array.isArray(data) ? data.slice(0, 6) : []))
+        .catch(() => setSuggestions([]));
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, []);
 
   return (
     <>
@@ -104,21 +142,55 @@ export default function Header() {
           </button>
 
           {/* Search */}
-          <form onSubmit={handleSearch} className="flex-1 flex max-w-2xl">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Пошук товарів, брендів..."
-              className="flex-1 h-10 bg-white text-[#111] text-sm px-4 rounded-l outline-none placeholder:text-[#aaa]"
-            />
-            <button
-              type="submit"
-              className="w-12 h-10 flex items-center justify-center bg-(--accent) text-white rounded-r hover:bg-(--accent-hover) transition-colors text-base"
-            >
-              🔍
-            </button>
-          </form>
+          <div ref={searchBoxRef} className="relative flex-1 max-w-2xl">
+            <form onSubmit={handleSearch} className="flex">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                placeholder="Пошук товарів, брендів..."
+                autoComplete="off"
+                className="flex-1 h-10 bg-white text-[#111] text-sm px-4 rounded-l outline-none placeholder:text-[#aaa]"
+              />
+              <button
+                type="submit"
+                className="w-12 h-10 flex items-center justify-center bg-(--accent) text-white rounded-r hover:bg-(--accent-hover) transition-colors text-base"
+              >
+                🔍
+              </button>
+            </form>
+
+            {/* Live suggestions dropdown */}
+            {showSuggestions && query.trim().length >= 2 && suggestions.length > 0 && (
+              <div className="absolute top-[calc(100%+6px)] left-0 right-0 bg-(--card) border border-(--border) rounded-lg shadow-xl overflow-hidden z-[70]">
+                {suggestions.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => handleSuggestionClick(p.id)}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-(--bg) transition-colors border-b border-(--border) last:border-b-0"
+                  >
+                    <span className="text-2xl w-9 h-9 flex items-center justify-center bg-(--bg) rounded-md shrink-0">
+                      {p.emoji}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-sm font-medium text-(--text) truncate">{p.name}</span>
+                      <span className="block text-xs text-(--muted)">{p.brand}</span>
+                    </span>
+                    <span className="text-sm font-bold text-(--text) shrink-0">{p.price.toLocaleString('uk-UA')} ₴</span>
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  className="w-full px-3 py-2 text-center text-sm font-semibold text-(--accent) hover:bg-(--bg) transition-colors"
+                >
+                  Усі результати для «{query.trim()}» →
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Actions */}
           <div className="flex items-center gap-0.5 ml-auto">

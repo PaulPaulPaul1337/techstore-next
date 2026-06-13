@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import HeroSlider from '@/components/HeroSlider';
 import ProductCard from '@/components/ProductCard';
+import RecentlyViewed from '@/components/RecentlyViewed';
 import { categoryLabels, categoryEmojis, Category } from '@/data/products';
 import { prisma } from '@/lib/prisma';
 
@@ -91,6 +92,9 @@ export default async function HomePage() {
               </div>
             </section>
           )}
+
+          {/* Recently viewed */}
+          <RecentlyViewed limit={10} className="" />
 
           {featured.length === 0 && (
             <div className="text-center py-20 text-(--muted)">

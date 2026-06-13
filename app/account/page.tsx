@@ -90,6 +90,7 @@ export default function AccountPage() {
               { label: '♡ Список обраного', href: '/wishlist' },
               { label: '⚖️ Порівняння товарів', href: '/compare' },
               { label: '📦 Каталог товарів', href: '/catalog' },
+              { label: '🧾 Історія покупок', href: '/account/orders' },
               ...(user.isAdmin ? [{ label: '⚙️ Панель адміністратора', href: '/admin' }] : []),
             ].map(({ label, href }, idx, arr) => (
               <Link
