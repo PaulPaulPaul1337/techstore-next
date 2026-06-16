@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import { Product } from '@/data/products';
@@ -171,8 +172,12 @@ export default function Header() {
                     onClick={() => handleSuggestionClick(p.id)}
                     className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-(--bg) transition-colors border-b border-(--border) last:border-b-0"
                   >
-                    <span className="text-2xl w-9 h-9 flex items-center justify-center bg-(--bg) rounded-md shrink-0">
-                      {p.emoji}
+                    <span className="relative text-2xl w-9 h-9 flex items-center justify-center bg-(--bg) rounded-md shrink-0 overflow-hidden">
+                      {p.image ? (
+                        <Image src={p.image} alt={p.name} fill sizes="36px" className="object-contain p-1" />
+                      ) : (
+                        p.emoji
+                      )}
                     </span>
                     <span className="flex-1 min-w-0">
                       <span className="block text-sm font-medium text-(--text) truncate">{p.name}</span>

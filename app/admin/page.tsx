@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 
 type Product = {
   id: string; name: string; brand: string; category: string;
-  price: number; inStock: boolean; emoji: string; isStatic: boolean;
+  price: number; inStock: boolean; emoji: string; image: string; isStatic: boolean;
 };
 
 export default function AdminPage() {
@@ -97,7 +98,13 @@ export default function AdminPage() {
                 <tr key={product.id} className="border-b border-(--border) hover:bg-(--bg) transition-colors">
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{product.emoji}</span>
+                      <span className="relative text-2xl w-8 h-8 flex items-center justify-center bg-(--bg) rounded-md overflow-hidden shrink-0">
+                        {product.image ? (
+                          <Image src={product.image} alt={product.name} fill sizes="32px" className="object-contain p-0.5" />
+                        ) : (
+                          product.emoji
+                        )}
+                      </span>
                       <div>
                         <div className="text-[13px] font-semibold line-clamp-1">{product.name}</div>
                         <div className="text-[11px] text-(--muted)">{product.brand}</div>

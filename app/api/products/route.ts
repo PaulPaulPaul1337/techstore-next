@@ -44,6 +44,7 @@ export async function POST(req: Request) {
       price: Number(data.price),
       oldPrice: data.oldPrice ? Number(data.oldPrice) : null,
       emoji: data.emoji || '📦',
+      image: data.image || '',
       badge: data.badge || null,
       specs: data.specs || [],
       description: data.description || '',

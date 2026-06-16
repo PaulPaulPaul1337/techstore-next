@@ -73,6 +73,16 @@ export default function ReviewsSection({ productId }: { productId: string }) {
       .catch(() => setLoading(false));
   }, [productId]);
 
+  async function handleDelete(reviewId: string) {
+    if (!confirm('Видалити цей відгук?')) return;
+    const res = await fetch(`/api/reviews/${reviewId}`, { method: 'DELETE' });
+    if (res.ok) {
+      setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+    } else {
+      alert('Помилка видалення відгуку');
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -226,7 +236,18 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                     <div className="text-xs text-(--muted)">{timeAgo(r.createdAt)}</div>
                   </div>
                 </div>
-                <Stars value={r.rating} />
+                <div className="flex items-center gap-3">
+                  <Stars value={r.rating} />
+                  {user?.isAdmin && (
+                    <button
+                      onClick={() => handleDelete(r.id)}
+                      title="Видалити відгук"
+                      className="text-(--muted) hover:text-(--accent) text-sm transition-colors"
+                    >
+                      🗑
+                    </button>
+                  )}
+                </div>
               </div>
               <p className="text-sm text-(--text) leading-relaxed">{r.comment}</p>
             </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCompareStore } from '@/store/compareStore';
 import { useCartStore } from '@/store/cartStore';
 import { products } from '@/data/products';
@@ -51,7 +52,13 @@ export default function ComparePage() {
               {compareItems.map((product) => (
                 <td key={product.id} className="p-3 border-b border-(--border) min-w-[200px]">
                   <div className="text-center">
-                    <div className="text-[60px] my-2 bg-(--bg) rounded-lg py-4">{product.emoji}</div>
+                    <div className="relative h-24 my-2 bg-(--bg) rounded-lg overflow-hidden">
+                      {product.image ? (
+                        <Image src={product.image} alt={product.name} fill sizes="200px" className="object-contain p-3" />
+                      ) : (
+                        <span className="text-[60px] flex items-center justify-center h-full">{product.emoji}</span>
+                      )}
+                    </div>
                     <div className="text-[13px] font-semibold leading-snug mb-2">{product.name}</div>
                     <div className="text-[18px] font-bold text-(--accent) mb-3">
                       {product.price.toLocaleString('uk-UA')} ₴

@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { categoryLabels, categoryEmojis } from '@/data/products';
 import { useCartStore } from '@/store/cartStore';
 import { useViewHistoryStore } from '@/store/viewHistoryStore';
@@ -17,6 +18,7 @@ interface DBProduct {
   price: number;
   oldPrice?: number | null;
   emoji: string;
+  image: string;
   badge?: string | null;
   specs: string[];
   description: string;
@@ -104,8 +106,26 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         {/* Image */}
-        <div className="bg-(--card) rounded-lg flex items-center justify-center aspect-square text-[160px] relative">
-          {product.emoji}
+        <div className="bg-(--card) rounded-lg flex items-center justify-center aspect-square relative overflow-hidden">
+          {product.image ? (
+            <>
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-contain p-8"
+              />
+              {selectedColor && (
+                <div
+                  className="absolute inset-8 pointer-events-none transition-colors duration-300"
+                  style={{ backgroundColor: selectedColor, mixBlendMode: 'color', opacity: 0.6 }}
+                />
+              )}
+            </>
+          ) : (
+            <span className="text-[160px]">{product.emoji}</span>
+          )}
           {discount && (
             <span
               className="absolute top-4 left-4 text-white text-[13px] font-bold px-3 py-1.5"
@@ -124,12 +144,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} style={{ color: i < product.rating ? 'var(--star)' : 'var(--muted)', fontSize: 16 }}>★</span>
-              ))}
-            </div>
-            <span className="text-(--muted) text-sm">{product.reviewCount} відгуків</span>
+            {product.reviewCount > 0 ? (
+              <>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} style={{ color: i < product.rating ? 'var(--star)' : 'var(--muted)', fontSize: 16 }}>★</span>
+                  ))}
+                </div>
+                <span className="text-(--muted) text-sm">{product.reviewCount} відгуків</span>
+              </>
+            ) : (
+              <span className="text-(--muted) text-sm">Немає відгуків</span>
+            )}
           </div>
 
           <div className="flex items-baseline gap-3">
@@ -149,8 +175,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div className="flex gap-2">
                 {product.colors.map((c) => (
                   <button key={c} type="button" onClick={() => setSelectedColor(c)}
-                    className="w-8 h-8 rounded-full transition-all"
-                    style={{ background: c, outline: selectedColor === c ? '2px solid white' : '2px solid transparent', outlineOffset: 2 }}
+                    title={c}
+                    className="w-8 h-8 rounded-full cursor-pointer transition-transform hover:scale-110"
+                    style={{ background: c, outline: selectedColor === c ? '2px solid var(--accent)' : '2px solid transparent', outlineOffset: 2 }}
                   />
                 ))}
               </div>

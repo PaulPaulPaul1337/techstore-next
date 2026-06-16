@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useCartStore } from '@/store/cartStore';
 import CheckoutModal from '@/components/CheckoutModal';
@@ -49,8 +50,12 @@ export default function CartPage() {
               className="bg-(--card) border border-(--border) rounded-lg p-4 flex gap-4 items-center"
             >
               {/* Image */}
-              <Link href={`/product/${product.id}`} className="text-5xl flex-shrink-0 w-16 h-16 flex items-center justify-center bg-[#222] rounded-md">
-                {product.emoji}
+              <Link href={`/product/${product.id}`} className="relative text-5xl flex-shrink-0 w-16 h-16 flex items-center justify-center bg-[#222] rounded-md overflow-hidden">
+                {product.image ? (
+                  <Image src={product.image} alt={product.name} fill sizes="64px" className="object-contain p-1.5" />
+                ) : (
+                  product.emoji
+                )}
               </Link>
 
               {/* Info */}

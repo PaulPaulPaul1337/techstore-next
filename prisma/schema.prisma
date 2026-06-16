@@ -25,12 +25,14 @@ enum Badge {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  isAdmin   Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id               String    @id @default(cuid())
+  name             String
+  email            String    @unique
+  password         String
+  isAdmin          Boolean   @default(false)
+  resetCode        String?
+  resetCodeExpires DateTime?
+  createdAt        DateTime  @default(now())
 }
 
 model Product {
@@ -41,6 +43,7 @@ model Product {
   price       Int
   oldPrice    Int?
   emoji       String    @default("📦")
+  image       String    @default("")
   badge       Badge?
   specs       String[]
   description String

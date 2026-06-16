@@ -10,7 +10,7 @@ const categories = Object.keys(categoryLabels) as Category[];
 
 type FormState = {
   name: string; brand: string; category: Category;
-  price: string; oldPrice: string; emoji: string;
+  price: string; oldPrice: string; emoji: string; image: string;
   badge: '' | 'new' | 'hit' | 'sale';
   specs: string; description: string; inStock: boolean;
   colors: string; rating: string; reviewCount: string;
@@ -43,6 +43,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           price: String(p.price),
           oldPrice: p.oldPrice ? String(p.oldPrice) : '',
           emoji: p.emoji,
+          image: p.image ?? '',
           badge: (p.badge ?? '') as FormState['badge'],
           specs: (p.specs as string[]).join('\n'),
           description: p.description,
@@ -113,6 +114,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           </Field>
           <Field label="Емодзі"><input value={form.emoji} onChange={(e) => set('emoji', e.target.value)} className={inp} /></Field>
         </div>
+
+        <Field label="URL зображення">
+          <input value={form.image} onChange={(e) => set('image', e.target.value)} className={inp} placeholder="https://cdn.dummyjson.com/product-images/..." />
+        </Field>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <Field label="Ціна (₴) *"><input required type="number" min="1" value={form.price} onChange={(e) => set('price', e.target.value)} className={inp} /></Field>

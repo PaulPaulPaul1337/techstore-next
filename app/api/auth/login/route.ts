@@ -16,11 +16,13 @@ export async function POST(req: Request) {
   });
 
   if (!user) {
+    console.log(`[login] no user found for email="${email.toLowerCase()}"`);
     return Response.json({ error: 'invalid' }, { status: 401 });
   }
 
   // compare() safely checks the password against the bcrypt hash
   const valid = await compare(password, user.password);
+  console.log(`[login] user=${user.id} email="${user.email}" passwordLength=${password.length} hashPrefix=${user.password.slice(0, 10)} valid=${valid}`);
   if (!valid) {
     return Response.json({ error: 'invalid' }, { status: 401 });
   }

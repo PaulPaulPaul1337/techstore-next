@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCartStore } from '@/store/cartStore';
 import { products } from '@/data/products';
@@ -33,8 +34,12 @@ export default function WishlistPage() {
           {wishItems.map((product) => (
             <div key={product.id} className="bg-(--card) border border-(--border) rounded-md overflow-hidden hover:shadow-md transition-shadow">
               <Link href={`/product/${product.id}`} className="block">
-                <div className="aspect-square flex items-center justify-center text-[80px] bg-(--bg)">
-                  {product.emoji}
+                <div className="relative aspect-square flex items-center justify-center bg-(--bg)">
+                  {product.image ? (
+                    <Image src={product.image} alt={product.name} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-contain p-5" />
+                  ) : (
+                    <span className="text-[80px]">{product.emoji}</span>
+                  )}
                 </div>
                 <div className="p-4">
                   <div className="text-[13px] font-semibold text-(--text) line-clamp-2 mb-2">

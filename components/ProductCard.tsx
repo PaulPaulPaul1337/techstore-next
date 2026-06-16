@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { Product } from '@/data/products';
 import { useCartStore } from '@/store/cartStore';
@@ -53,8 +54,18 @@ export default function ProductCard({ product }: { product: Product }) {
       className="group bg-(--card) border border-(--border) hover:border-(--accent) hover:shadow-md rounded-md flex flex-col transition-all duration-200 relative overflow-hidden"
     >
       {/* Image area */}
-      <div className="relative aspect-square flex items-center justify-center text-[80px] p-5 bg-(--bg)">
-        {product.emoji}
+      <div className="relative aspect-square flex items-center justify-center bg-(--bg)">
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className="object-contain p-5"
+          />
+        ) : (
+          <span className="text-[80px]">{product.emoji}</span>
+        )}
 
         {badge && (
           <span
@@ -97,12 +108,18 @@ export default function ProductCard({ product }: { product: Product }) {
 
       {/* Stars */}
       <div className="flex justify-center gap-0.5 pt-2.5 px-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <span key={i} style={{ color: i < product.rating ? 'var(--star)' : '#ddd', fontSize: 12 }}>
-            ★
-          </span>
-        ))}
-        <span className="text-(--muted) text-[11px] ml-1">({product.reviewCount})</span>
+        {product.reviewCount > 0 ? (
+          <>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <span key={i} style={{ color: i < product.rating ? 'var(--star)' : '#ddd', fontSize: 12 }}>
+                ★
+              </span>
+            ))}
+            <span className="text-(--muted) text-[11px] ml-1">({product.reviewCount})</span>
+          </>
+        ) : (
+          <span className="text-(--muted) text-[11px]">Немає відгуків</span>
+        )}
       </div>
 
       {/* Title */}

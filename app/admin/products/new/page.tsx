@@ -10,7 +10,7 @@ const categories = Object.keys(categoryLabels) as Category[];
 
 const emptyForm = {
   name: '', brand: '', category: 'smartphones' as Category,
-  price: '', oldPrice: '', emoji: '📦',
+  price: '', oldPrice: '', emoji: '📦', image: '',
   badge: '' as '' | 'new' | 'hit' | 'sale',
   specs: '', description: '', inStock: true,
   colors: '', rating: '5', reviewCount: '0',
@@ -92,6 +92,10 @@ export default function NewProductPage() {
             <input value={form.emoji} onChange={(e) => set('emoji', e.target.value)} className={input} placeholder="📱" />
           </Field>
         </div>
+
+        <Field label="URL зображення">
+          <input value={form.image} onChange={(e) => set('image', e.target.value)} className={input} placeholder="https://cdn.dummyjson.com/product-images/..." />
+        </Field>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <Field label="Ціна (₴) *">

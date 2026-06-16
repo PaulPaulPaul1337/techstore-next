@@ -28,6 +28,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       price: Number(data.price),
       oldPrice: data.oldPrice ? Number(data.oldPrice) : null,
       emoji: data.emoji,
+      image: data.image || '',
       badge: (data.badge || null) as Badge | null,
       specs: data.specs,
       description: data.description,
