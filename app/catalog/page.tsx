@@ -6,18 +6,12 @@ import { Suspense } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { categoryLabels, categoryEmojis, Category } from '@/data/products';
 import type { Product } from '@/data/products';
+import { useT } from '@/hooks/useT';
 
 const categories = Object.keys(categoryLabels) as Category[];
 
-const sortOptions = [
-  { value: 'default', label: 'За замовчуванням' },
-  { value: 'price_asc', label: 'Ціна: зростання' },
-  { value: 'price_desc', label: 'Ціна: спадання' },
-  { value: 'rating', label: 'За рейтингом' },
-  { value: 'name', label: 'За назвою' },
-];
-
 function CatalogContent() {
+  const t = useT();
   const searchParams = useSearchParams();
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [dbLoaded, setDbLoaded] = useState(false);
@@ -26,7 +20,6 @@ function CatalogContent() {
   const [search, setSearch] = useState(searchParams.get('q') || '');
   const [badge, setBadge] = useState(searchParams.get('badge') || '');
 
-  // Fetch all products from the DB via API on mount
   useEffect(() => {
     fetch('/api/products')
       .then((r) => r.json())
@@ -80,12 +73,27 @@ function CatalogContent() {
     setInStockOnly(false);
   }
 
+  const sortOptions = [
+    { value: 'default', label: t.sortDefault },
+    { value: 'price_asc', label: t.sortPriceAsc },
+    { value: 'price_desc', label: t.sortPriceDesc },
+    { value: 'rating', label: t.sortRating },
+    { value: 'name', label: t.sortName },
+  ];
+
+  const badgeOptions = [
+    { value: '', label: t.all },
+    { value: 'new', label: t.badgeNew },
+    { value: 'hit', label: t.badgeHit },
+    { value: 'sale', label: t.badgeSale },
+  ];
+
   const pageTitle =
-    badge === 'sale' ? '🔥 Акції'
-    : badge === 'hit' ? '⭐ Хіти продажів'
+    badge === 'sale' ? t.salePageTitle
+    : badge === 'hit' ? t.hitPageTitle
     : category ? `${categoryEmojis[category as Category]} ${categoryLabels[category as Category]}`
-    : search ? `Пошук: "${search}"`
-    : 'Весь каталог';
+    : search ? t.searchTitle(search)
+    : t.allCatalog;
 
   return (
     <div className="max-w-[1440px] mx-auto px-4 py-6">
@@ -97,25 +105,25 @@ function CatalogContent() {
 
           {/* Search */}
           <div>
-            <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">Пошук</div>
+            <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">{t.searchLabel}</div>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Назва, бренд..."
+              placeholder={t.searchPlaceholder}
               className="w-full h-9 bg-(--card) border border-(--border) text-(--text) text-sm px-3 rounded focus:border-(--muted) outline-none"
             />
           </div>
 
           {/* Categories */}
           <div>
-            <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">Категорія</div>
+            <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">{t.categoryLabel}</div>
             <div className="flex flex-col gap-0.5">
               <button
                 onClick={() => setCategory('')}
                 className={`text-left px-2.5 py-2 rounded text-[13px] transition-colors ${!category ? 'bg-(--accent) text-white font-semibold' : 'text-(--muted) hover:text-(--text) hover:bg-(--card)'}`}
               >
-                Всі категорії
+                {t.allCategories}
               </button>
               {categories.map((cat) => (
                 <button
@@ -131,14 +139,9 @@ function CatalogContent() {
 
           {/* Badges */}
           <div>
-            <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">Тип</div>
+            <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">{t.typeLabel}</div>
             <div className="flex flex-col gap-0.5">
-              {[
-                { value: '', label: 'Всі' },
-                { value: 'new', label: '🆕 Новинки' },
-                { value: 'hit', label: '⭐ Хіти' },
-                { value: 'sale', label: '🔥 Акції' },
-              ].map(({ value, label }) => (
+              {badgeOptions.map(({ value, label }) => (
                 <button
                   key={value}
                   onClick={() => setBadge(value)}
@@ -153,7 +156,7 @@ function CatalogContent() {
           {/* Price */}
           <div>
             <div className="text-[13px] font-bold mb-2 text-(--muted) uppercase tracking-wide">
-              Макс. ціна: {maxPrice.toLocaleString('uk-UA')} ₴
+              {t.maxPriceLabel} {maxPrice.toLocaleString('uk-UA')} ₴
             </div>
             <input
               type="range"
@@ -178,14 +181,14 @@ function CatalogContent() {
               onChange={(e) => setInStockOnly(e.target.checked)}
               className="w-4 h-4 accent-(--accent)"
             />
-            <span className="text-[13px]">Тільки в наявності</span>
+            <span className="text-[13px]">{t.inStockOnly}</span>
           </label>
 
           <button
             onClick={resetFilters}
             className="text-[13px] text-(--muted) hover:text-(--text) transition-colors underline text-left"
           >
-            Скинути фільтри
+            {t.resetFilters}
           </button>
         </aside>
 
@@ -194,7 +197,7 @@ function CatalogContent() {
           {/* Toolbar */}
           <div className="flex items-center justify-between mb-4">
             <span className="text-(--muted) text-sm">
-              Знайдено: <strong className="text-(--text)">{filtered.length}</strong> товарів
+              {t.foundLabel} <strong className="text-(--text)">{filtered.length}</strong> {t.productsUnit}
             </span>
             <select
               value={sort}
@@ -210,13 +213,13 @@ function CatalogContent() {
           {!dbLoaded ? (
             <div className="text-center py-20 text-(--muted)">
               <div className="text-4xl mb-3 animate-pulse">⏳</div>
-              <div className="text-sm">Завантаження товарів...</div>
+              <div className="text-sm">{t.loadingProducts}</div>
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-20 text-(--muted)">
               <div className="text-5xl mb-4">🔍</div>
-              <div className="text-lg font-semibold mb-2">Нічого не знайдено</div>
-              <button onClick={resetFilters} className="text-(--accent) underline text-sm hover:opacity-80">Скинути фільтри</button>
+              <div className="text-lg font-semibold mb-2">{t.nothingFound}</div>
+              <button onClick={resetFilters} className="text-(--accent) underline text-sm hover:opacity-80">{t.resetFilters}</button>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -233,7 +236,7 @@ function CatalogContent() {
 
 export default function CatalogPage() {
   return (
-    <Suspense fallback={<div className="text-center py-20 text-(--muted)">Завантаження...</div>}>
+    <Suspense fallback={<div className="text-center py-20 text-(--muted)"><div className="text-4xl animate-pulse">⏳</div></div>}>
       <CatalogContent />
     </Suspense>
   );

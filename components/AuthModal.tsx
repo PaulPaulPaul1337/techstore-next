@@ -7,8 +7,10 @@ import { useAuthModalStore } from '@/store/authModalStore';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCompareStore } from '@/store/compareStore';
+import { useT } from '@/hooks/useT';
 
 export default function AuthModal() {
+  const t = useT();
   const { isOpen, mode, close, openLogin, openRegister, openForgot } = useAuthModalStore();
   const user = useAuthStore((s) => s.user);
   const login = useAuthStore((s) => s.login);
@@ -90,7 +92,7 @@ export default function AuthModal() {
     if (result === 'ok') {
       handleClose();
     } else {
-      setError('Невірний email або пароль');
+      setError(t.wrongCredentials);
     }
   }
 
@@ -98,7 +100,7 @@ export default function AuthModal() {
     e.preventDefault();
     setError('');
     if (password.length < 6) {
-      setError('Пароль повинен містити не менше 6 символів');
+      setError(t.passwordTooShort);
       return;
     }
     setSubmitting(true);
@@ -107,7 +109,7 @@ export default function AuthModal() {
     if (result === 'ok') {
       handleClose();
     } else {
-      setError('Акаунт з таким email вже існує');
+      setError(t.accountExists);
     }
   }
 
@@ -119,14 +121,10 @@ export default function AuthModal() {
     const result = await requestPasswordReset(email);
     setSubmitting(false);
     if (result.status === 'ok') {
-      setSuccess(
-        result.code
-          ? `Код підтвердження надіслано на ${email}. (Демо-режим, email не налаштовано — ваш код: ${result.code})`
-          : `Код підтвердження надіслано на ${email}.`
-      );
+      setSuccess(result.code ? t.codeSentDemo(email, result.code) : t.codeSent(email));
       setForgotStep('code');
     } else {
-      setError('Користувача з таким email не знайдено');
+      setError(t.wrongCredentials);
     }
   }
 
@@ -140,7 +138,7 @@ export default function AuthModal() {
     if (result === 'ok') {
       setForgotStep('password');
     } else {
-      setError('Невірний або застарілий код підтвердження');
+      setError(t.invalidCode);
     }
   }
 
@@ -149,39 +147,39 @@ export default function AuthModal() {
     setError('');
     setSuccess('');
     if (newPassword.length < 6) {
-      setError('Пароль повинен містити не менше 6 символів');
+      setError(t.passwordTooShort);
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError('Паролі не співпадають');
+      setError(t.passwordsMismatch);
       return;
     }
     setSubmitting(true);
     const result = await resetPassword(email, code, newPassword);
     setSubmitting(false);
     if (result === 'ok') {
-      setSuccess('Пароль успішно змінено! Тепер увійдіть з новим паролем.');
+      setSuccess(t.passwordChanged);
       setTimeout(openLogin, 1500);
     } else if (result === 'invalid') {
-      setError('Невірний або застарілий код підтвердження');
+      setError(t.invalidCode);
     } else {
-      setError('Користувача з таким email не знайдено');
+      setError(t.wrongCredentials);
     }
   }
 
   const menuItems = [
-    { icon: '🛒', label: 'Кошик', href: '/cart', count: cartCount, sub: `${cartTotal.toLocaleString('uk-UA')} ₴` },
-    { icon: '♡', label: 'Обране', href: '/wishlist', count: wishCount, sub: `${wishCount} товарів` },
-    { icon: '⚖️', label: 'Порівняння', href: '/compare', count: compareCount, sub: `${compareCount} товарів` },
+    { icon: '🛒', label: t.cart, href: '/cart', count: cartCount, sub: `${cartTotal.toLocaleString('uk-UA')} ₴` },
+    { icon: '♡', label: t.wishlist, href: '/wishlist', count: wishCount, sub: `${wishCount} ${t.productsWord}` },
+    { icon: '⚖️', label: t.compare, href: '/compare', count: compareCount, sub: `${compareCount} ${t.productsWord}` },
   ];
 
   const navLinks = [
-    { label: '🛒 Кошик', href: '/cart' },
-    { label: '♡ Список обраного', href: '/wishlist' },
-    { label: '⚖️ Порівняння товарів', href: '/compare' },
-    { label: '📦 Каталог товарів', href: '/catalog' },
-    { label: '🧾 Історія покупок', href: '/account/orders' },
-    ...(user?.isAdmin ? [{ label: '⚙️ Панель адміністратора', href: '/admin' }] : []),
+    { label: t.navCart, href: '/cart' },
+    { label: t.navWishlist, href: '/wishlist' },
+    { label: t.navCompare, href: '/compare' },
+    { label: t.navCatalog, href: '/catalog' },
+    { label: t.navOrders, href: '/account/orders' },
+    ...(user?.isAdmin ? [{ label: t.navAdmin, href: '/admin' }] : []),
   ];
 
   return (
@@ -226,7 +224,7 @@ export default function AuthModal() {
                   <div className="text-(--muted) text-sm truncate">{user.email}</div>
                   {user.isAdmin && (
                     <span className="inline-block mt-1 bg-(--accent) text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      Адміністратор
+                      {t.administrator}
                     </span>
                   )}
                 </div>
@@ -273,7 +271,7 @@ export default function AuthModal() {
                 onClick={handleLogout}
                 className="w-full h-10 border border-(--border) rounded-lg text-sm text-(--muted) hover:text-(--accent) hover:border-(--accent) transition-colors font-semibold"
               >
-                Вийти з акаунту
+                {t.logout}
               </button>
             </div>
           </div>
@@ -287,7 +285,7 @@ export default function AuthModal() {
                   onClick={openLogin}
                   className="text-sm font-bold text-(--muted) hover:text-(--text) transition-colors"
                 >
-                  ← Назад до входу
+                  {t.backToLogin}
                 </button>
               </div>
             ) : (
@@ -300,7 +298,7 @@ export default function AuthModal() {
                       : 'text-(--muted) border-transparent hover:text-(--text)'
                   }`}
                 >
-                  Увійти
+                  {t.loginTab}
                 </button>
                 <button
                   onClick={openRegister}
@@ -310,7 +308,7 @@ export default function AuthModal() {
                       : 'text-(--muted) border-transparent hover:text-(--text)'
                   }`}
                 >
-                  Реєстрація
+                  {t.registerTab}
                 </button>
               </div>
             )}
@@ -330,7 +328,7 @@ export default function AuthModal() {
               {mode === 'login' ? (
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-1.5">Email</label>
+                    <label className="block text-sm font-semibold mb-1.5">{t.email}</label>
                     <input
                       ref={firstInputRef}
                       type="email"
@@ -343,13 +341,13 @@ export default function AuthModal() {
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="block text-sm font-semibold">Пароль</label>
+                      <label className="block text-sm font-semibold">{t.password}</label>
                       <button
                         type="button"
                         onClick={openForgot}
                         className="text-xs font-semibold text-(--accent) hover:underline"
                       >
-                        Забули пароль?
+                        {t.forgotPassword}
                       </button>
                     </div>
                     <input
@@ -366,11 +364,11 @@ export default function AuthModal() {
                     disabled={submitting}
                     className="w-full h-11 bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-60 text-white font-bold rounded-lg transition-colors"
                   >
-                    {submitting ? 'Вхід...' : 'Увійти'}
+                    {submitting ? t.loggingIn : t.loginBtn}
                   </button>
 
                   <div className="pt-4 border-t border-(--border) text-xs text-(--muted) text-center space-y-1.5">
-                    <p>Для демо-доступу адміністратора:</p>
+                    <p>{t.demoAdmin}</p>
                     <p className="font-mono bg-[#f4f4f4] px-3 py-1.5 rounded inline-block">
                       admin@techstore.ua / admin123
                     </p>
@@ -379,19 +377,19 @@ export default function AuthModal() {
               ) : mode === 'register' ? (
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-1.5">Ім&apos;я</label>
+                    <label className="block text-sm font-semibold mb-1.5">{t.name}</label>
                     <input
                       ref={firstInputRef}
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Іван Петренко"
+                      placeholder={t.namePlaceholder}
                       required
                       className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1.5">Email</label>
+                    <label className="block text-sm font-semibold mb-1.5">{t.email}</label>
                     <input
                       type="email"
                       value={email}
@@ -402,12 +400,12 @@ export default function AuthModal() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1.5">Пароль</label>
+                    <label className="block text-sm font-semibold mb-1.5">{t.password}</label>
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Мінімум 6 символів"
+                      placeholder={t.minPasswordPlaceholder}
                       required
                       className={inputClass}
                     />
@@ -417,16 +415,14 @@ export default function AuthModal() {
                     disabled={submitting}
                     className="w-full h-11 bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-60 text-white font-bold rounded-lg transition-colors"
                   >
-                    {submitting ? 'Реєстрація...' : 'Зареєструватися'}
+                    {submitting ? t.registering : t.registerBtn}
                   </button>
                 </form>
               ) : forgotStep === 'email' ? (
                 <form onSubmit={handleForgotEmail} className="space-y-4">
-                  <p className="text-sm text-(--muted)">
-                    Вкажіть email вашого акаунту — ми надішлемо код підтвердження.
-                  </p>
+                  <p className="text-sm text-(--muted)">{t.forgotDesc}</p>
                   <div>
-                    <label className="block text-sm font-semibold mb-1.5">Email</label>
+                    <label className="block text-sm font-semibold mb-1.5">{t.email}</label>
                     <input
                       ref={firstInputRef}
                       type="email"
@@ -442,16 +438,16 @@ export default function AuthModal() {
                     disabled={submitting}
                     className="w-full h-11 bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-60 text-white font-bold rounded-lg transition-colors"
                   >
-                    {submitting ? 'Надсилання...' : 'Надіслати код'}
+                    {submitting ? t.sending : t.sendCode}
                   </button>
                 </form>
               ) : forgotStep === 'code' ? (
                 <form onSubmit={handleForgotCode} className="space-y-4">
                   <p className="text-sm text-(--muted)">
-                    Введіть 6-значний код підтвердження, надісланий на <span className="font-semibold text-(--text)">{email}</span>.
+                    {t.codeDesc} <span className="font-semibold text-(--text)">{email}</span>.
                   </p>
                   <div>
-                    <label className="block text-sm font-semibold mb-1.5">Код підтвердження</label>
+                    <label className="block text-sm font-semibold mb-1.5">{t.verificationCode}</label>
                     <input
                       ref={firstInputRef}
                       type="text"
@@ -469,40 +465,38 @@ export default function AuthModal() {
                     disabled={submitting}
                     className="w-full h-11 bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-60 text-white font-bold rounded-lg transition-colors"
                   >
-                    {submitting ? 'Перевірка...' : 'Підтвердити'}
+                    {submitting ? t.verifying : t.verify}
                   </button>
                   <button
                     type="button"
                     onClick={() => setForgotStep('email')}
                     className="w-full text-center text-xs font-semibold text-(--muted) hover:text-(--text) transition-colors"
                   >
-                    Змінити email
+                    {t.changeEmail}
                   </button>
                 </form>
               ) : (
                 <form onSubmit={handleForgotPassword} className="space-y-4">
-                  <p className="text-sm text-(--muted)">
-                    Код підтверджено. Введіть новий пароль для вашого акаунту.
-                  </p>
+                  <p className="text-sm text-(--muted)">{t.codeConfirmedDesc}</p>
                   <div>
-                    <label className="block text-sm font-semibold mb-1.5">Новий пароль</label>
+                    <label className="block text-sm font-semibold mb-1.5">{t.newPassword}</label>
                     <input
                       ref={firstInputRef}
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Мінімум 6 символів"
+                      placeholder={t.minPasswordPlaceholder}
                       required
                       className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1.5">Підтвердіть пароль</label>
+                    <label className="block text-sm font-semibold mb-1.5">{t.confirmPassword}</label>
                     <input
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Повторіть пароль"
+                      placeholder={t.repeatPasswordPlaceholder}
                       required
                       className={inputClass}
                     />
@@ -512,7 +506,7 @@ export default function AuthModal() {
                     disabled={submitting}
                     className="w-full h-11 bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-60 text-white font-bold rounded-lg transition-colors"
                   >
-                    {submitting ? 'Зміна паролю...' : 'Змінити пароль'}
+                    {submitting ? t.changingPassword : t.changePassword}
                   </button>
                 </form>
               )}

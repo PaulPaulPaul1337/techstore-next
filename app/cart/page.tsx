@@ -4,9 +4,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useCartStore } from '@/store/cartStore';
+import { useT } from '@/hooks/useT';
 import CheckoutModal from '@/components/CheckoutModal';
 
 export default function CartPage() {
+  const t = useT();
   const { items, removeItem, updateQty, clearCart, totalPrice } = useCartStore();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
@@ -14,13 +16,13 @@ export default function CartPage() {
     return (
       <div className="max-w-[1440px] mx-auto px-4 py-20 text-center">
         <div className="text-7xl mb-6">🛒</div>
-        <h1 className="text-2xl font-bold mb-3">Кошик порожній</h1>
-        <p className="text-(--muted) mb-8">Додайте товари до кошику та вони з'являться тут</p>
+        <h1 className="text-2xl font-bold mb-3">{t.emptyCart}</h1>
+        <p className="text-(--muted) mb-8">{t.cartEmptyDesc}</p>
         <Link
           href="/catalog"
           className="inline-block bg-(--accent) text-white font-bold px-8 py-3 rounded hover:bg-(--accent-hover) transition-colors"
         >
-          Перейти до каталогу
+          {t.backToCatalog}
         </Link>
       </div>
     );
@@ -32,12 +34,12 @@ export default function CartPage() {
   return (
     <div className="max-w-[1440px] mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Кошик</h1>
+        <h1 className="text-2xl font-bold">{t.cart}</h1>
         <button
           onClick={clearCart}
           className="text-(--muted) text-sm hover:text-red-400 transition-colors"
         >
-          🗑 Очистити кошик
+          {t.clearCart}
         </button>
       </div>
 
@@ -87,7 +89,7 @@ export default function CartPage() {
               <div className="text-right flex-shrink-0 w-28">
                 <div className="font-bold">{(product.price * qty).toLocaleString('uk-UA')} ₴</div>
                 {qty > 1 && (
-                  <div className="text-(--muted) text-xs">{product.price.toLocaleString('uk-UA')} ₴/шт</div>
+                  <div className="text-(--muted) text-xs">{product.price.toLocaleString('uk-UA')} ₴{t.perUnit}</div>
                 )}
               </div>
 
@@ -95,7 +97,7 @@ export default function CartPage() {
               <button
                 onClick={() => removeItem(product.id)}
                 className="text-(--muted) hover:text-red-400 transition-colors text-lg flex-shrink-0"
-                title="Видалити"
+                title={t.remove}
               >
                 ✕
               </button>
@@ -106,21 +108,21 @@ export default function CartPage() {
         {/* Order summary */}
         <div className="lg:col-span-1">
           <div className="bg-(--card) border border-(--border) rounded-lg p-5 sticky top-20">
-            <h2 className="text-lg font-bold mb-4">Підсумок замовлення</h2>
+            <h2 className="text-lg font-bold mb-4">{t.orderSummary}</h2>
 
             <div className="space-y-3 text-sm mb-4">
               <div className="flex justify-between text-(--muted)">
-                <span>Товари ({items.reduce((s, i) => s + i.qty, 0)} шт.)</span>
+                <span>{t.items(items.reduce((s, i) => s + i.qty, 0))}</span>
                 <span>{total.toLocaleString('uk-UA')} ₴</span>
               </div>
               <div className="flex justify-between text-(--muted)">
-                <span>Доставка</span>
+                <span>{t.deliveryLabel}</span>
                 <span className="text-green-400 font-semibold">
-                  {delivery === 0 ? 'Безкоштовно' : `${delivery} ₴`}
+                  {delivery === 0 ? t.freeDelivery : `${delivery} ₴`}
                 </span>
               </div>
               <div className="border-t border-(--border) pt-3 flex justify-between font-bold text-lg">
-                <span>Разом</span>
+                <span>{t.total}</span>
                 <span className="text-(--accent)">{total.toLocaleString('uk-UA')} ₴</span>
               </div>
             </div>
@@ -129,24 +131,24 @@ export default function CartPage() {
               onClick={() => setCheckoutOpen(true)}
               className="w-full h-12 bg-(--accent) text-white font-bold rounded hover:bg-(--accent-hover) transition-all duration-200 hover:-translate-y-0.5 mb-3"
             >
-              Оформити замовлення
+              {t.checkout}
             </button>
 
             <Link
               href="/catalog"
               className="block text-center text-sm text-(--muted) hover:text-(--text) transition-colors"
             >
-              ← Продовжити покупки
+              {t.continueShopping}
             </Link>
 
             {/* Payment badges */}
             <div className="mt-5 pt-4 border-t border-(--border)">
-              <div className="text-xs text-(--muted) mb-2 text-center">Способи оплати</div>
+              <div className="text-xs text-(--muted) mb-2 text-center">{t.paymentMethods}</div>
               <div className="flex justify-center gap-2 text-lg">
                 💳 📱 💵
               </div>
               <div className="text-[11px] text-(--muted) text-center mt-1.5">
-                Картка, Apple Pay / Google Pay, оплата при отриманні
+                {t.paymentMethodsDesc}
               </div>
             </div>
           </div>

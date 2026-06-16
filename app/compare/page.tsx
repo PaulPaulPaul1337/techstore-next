@@ -6,8 +6,10 @@ import { useCompareStore } from '@/store/compareStore';
 import { useCartStore } from '@/store/cartStore';
 import { products } from '@/data/products';
 import { useAdminProductsStore } from '@/store/adminProductsStore';
+import { useT } from '@/hooks/useT';
 
 export default function ComparePage() {
+  const t = useT();
   const ids = useCompareStore((s) => s.ids);
   const toggle = useCompareStore((s) => s.toggle);
   const clear = useCompareStore((s) => s.clear);
@@ -21,26 +23,24 @@ export default function ComparePage() {
     return (
       <div className="max-w-[1440px] mx-auto px-4 py-20 text-center text-(--muted)">
         <div className="text-6xl mb-4">⚖️</div>
-        <div className="text-lg font-semibold mb-2">Немає товарів для порівняння</div>
-        <p className="text-sm mb-6">Натискайте ⚖️ на картках товарів, щоб додати їх сюди</p>
+        <div className="text-lg font-semibold mb-2">{t.noCompare}</div>
+        <p className="text-sm mb-6">{t.noCompareHint}</p>
         <Link href="/catalog" className="bg-(--accent) text-white px-6 py-2.5 rounded font-bold hover:bg-(--accent-hover) transition-colors inline-block">
-          До каталогу
+          {t.backToCatalog}
         </Link>
       </div>
     );
   }
 
-  const allSpecs = Array.from(new Set(compareItems.flatMap((p) => p.specs)));
-
   return (
     <div className="max-w-[1440px] mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">⚖️ Порівняння товарів</h1>
+        <h1 className="text-2xl font-bold">{t.compareTitle}</h1>
         <button
           onClick={clear}
           className="text-sm text-(--muted) hover:text-(--accent) transition-colors underline"
         >
-          Очистити все
+          {t.clearAll}
         </button>
       </div>
 
@@ -48,7 +48,7 @@ export default function ComparePage() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <td className="w-40 p-3 text-(--muted) text-sm font-bold border-b border-(--border)">Характеристика</td>
+              <td className="w-40 p-3 text-(--muted) text-sm font-bold border-b border-(--border)">{t.characteristic}</td>
               {compareItems.map((product) => (
                 <td key={product.id} className="p-3 border-b border-(--border) min-w-[200px]">
                   <div className="text-center">
@@ -71,12 +71,12 @@ export default function ComparePage() {
                           product.inStock ? 'bg-(--accent) hover:bg-(--accent-hover)' : 'bg-[#ccc] cursor-not-allowed'
                         }`}
                       >
-                        В кошик
+                        {t.inCart}
                       </button>
                       <button
                         onClick={() => toggle(product.id)}
                         className="w-8 h-8 rounded border border-(--border) flex items-center justify-center text-(--muted) hover:text-(--accent) text-sm transition-colors"
-                        title="Видалити"
+                        title={t.remove}
                       >
                         ✕
                       </button>
@@ -89,18 +89,18 @@ export default function ComparePage() {
           <tbody>
             {/* Stock */}
             <tr className="bg-(--bg)">
-              <td className="p-3 text-[13px] text-(--muted) font-semibold border-b border-(--border)">Наявність</td>
+              <td className="p-3 text-[13px] text-(--muted) font-semibold border-b border-(--border)">{t.availability}</td>
               {compareItems.map((p) => (
                 <td key={p.id} className="p-3 text-center text-[13px] border-b border-(--border)">
                   <span className={p.inStock ? 'text-green-600 font-semibold' : 'text-red-400'}>
-                    {p.inStock ? '✓ Є' : '✗ Немає'}
+                    {p.inStock ? t.inStockShort : t.outOfStockShort}
                   </span>
                 </td>
               ))}
             </tr>
             {/* Rating */}
             <tr>
-              <td className="p-3 text-[13px] text-(--muted) font-semibold border-b border-(--border)">Рейтинг</td>
+              <td className="p-3 text-[13px] text-(--muted) font-semibold border-b border-(--border)">{t.rating}</td>
               {compareItems.map((p) => (
                 <td key={p.id} className="p-3 text-center text-[13px] border-b border-(--border)">
                   <span style={{ color: 'var(--star)' }}>{'★'.repeat(p.rating)}</span>
@@ -110,7 +110,7 @@ export default function ComparePage() {
             </tr>
             {/* Brand */}
             <tr className="bg-(--bg)">
-              <td className="p-3 text-[13px] text-(--muted) font-semibold border-b border-(--border)">Бренд</td>
+              <td className="p-3 text-[13px] text-(--muted) font-semibold border-b border-(--border)">{t.brand}</td>
               {compareItems.map((p) => (
                 <td key={p.id} className="p-3 text-center text-[13px] font-semibold border-b border-(--border)">{p.brand}</td>
               ))}
@@ -118,7 +118,7 @@ export default function ComparePage() {
             {/* Specs */}
             {compareItems[0].specs.map((spec, idx) => (
               <tr key={idx} className={idx % 2 === 0 ? '' : 'bg-(--bg)'}>
-                <td className="p-3 text-[12px] text-(--muted) border-b border-(--border)">Характеристика {idx + 1}</td>
+                <td className="p-3 text-[12px] text-(--muted) border-b border-(--border)">{t.specLabel(idx + 1)}</td>
                 {compareItems.map((p) => (
                   <td key={p.id} className="p-3 text-center text-[12px] text-(--text) border-b border-(--border)">
                     {p.specs[idx] ?? '—'}

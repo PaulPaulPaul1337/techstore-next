@@ -7,6 +7,7 @@ import { Product } from '@/data/products';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCompareStore } from '@/store/compareStore';
+import { useT } from '@/hooks/useT';
 
 const badgeConfig = {
   new:  { label: 'Новинка', bg: 'var(--badge-purple)' },
@@ -15,6 +16,7 @@ const badgeConfig = {
 };
 
 export default function ProductCard({ product }: { product: Product }) {
+  const t = useT();
   const addItem = useCartStore((s) => s.addItem);
   const [added, setAdded] = useState(false);
 
@@ -101,7 +103,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
         {!product.inStock && (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center text-(--muted) text-sm font-bold">
-            Немає в наявності
+            {t.outOfStockFull}
           </div>
         )}
       </div>
@@ -118,7 +120,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <span className="text-(--muted) text-[11px] ml-1">({product.reviewCount})</span>
           </>
         ) : (
-          <span className="text-(--muted) text-[11px]">Немає відгуків</span>
+          <span className="text-(--muted) text-[11px]">{t.noReviews}</span>
         )}
       </div>
 
@@ -156,7 +158,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <button
           onClick={handleAdd}
           disabled={!product.inStock}
-          title={product.inStock ? 'В кошик' : 'Немає в наявності'}
+          title={product.inStock ? t.inCart : t.outOfStockFull}
           className={`w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 transition-all duration-200 ${
             added
               ? 'bg-green-600 text-white scale-110'

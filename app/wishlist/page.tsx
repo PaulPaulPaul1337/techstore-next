@@ -6,8 +6,10 @@ import { useWishlistStore } from '@/store/wishlistStore';
 import { useCartStore } from '@/store/cartStore';
 import { products } from '@/data/products';
 import { useAdminProductsStore } from '@/store/adminProductsStore';
+import { useT } from '@/hooks/useT';
 
 export default function WishlistPage() {
+  const t = useT();
   const ids = useWishlistStore((s) => s.ids);
   const toggle = useWishlistStore((s) => s.toggle);
   const addItem = useCartStore((s) => s.addItem);
@@ -18,15 +20,15 @@ export default function WishlistPage() {
 
   return (
     <div className="max-w-[1440px] mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">♡ Обране</h1>
+      <h1 className="text-2xl font-bold mb-6">{t.wishlistTitle}</h1>
 
       {wishItems.length === 0 ? (
         <div className="text-center py-20 text-(--muted)">
           <div className="text-6xl mb-4">♡</div>
-          <div className="text-lg font-semibold mb-2">Список обраного порожній</div>
-          <p className="text-sm mb-6">Натискайте ♡ на картках товарів, щоб додати їх сюди</p>
+          <div className="text-lg font-semibold mb-2">{t.wishlistEmpty}</div>
+          <p className="text-sm mb-6">{t.wishlistEmptyHint}</p>
           <Link href="/catalog" className="bg-(--accent) text-white px-6 py-2.5 rounded font-bold hover:bg-(--accent-hover) transition-colors inline-block">
-            До каталогу
+            {t.backToCatalog}
           </Link>
         </div>
       ) : (
@@ -58,12 +60,12 @@ export default function WishlistPage() {
                     product.inStock ? 'bg-(--accent) hover:bg-(--accent-hover)' : 'bg-[#ccc] cursor-not-allowed'
                   }`}
                 >
-                  {product.inStock ? 'В кошик' : 'Немає'}
+                  {product.inStock ? t.inCart : t.outOfStock}
                 </button>
                 <button
                   onClick={() => toggle(product.id)}
                   className="w-9 h-9 rounded border border-(--border) flex items-center justify-center text-[#c42a2c] hover:bg-(--bg) transition-colors"
-                  title="Видалити з обраного"
+                  title={t.removeFromWishlist}
                 >
                   ✕
                 </button>

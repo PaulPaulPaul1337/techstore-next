@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { categoryLabels, categoryEmojis } from '@/data/products';
 import { useCartStore } from '@/store/cartStore';
 import { useViewHistoryStore } from '@/store/viewHistoryStore';
+import { useT } from '@/hooks/useT';
 import ProductCard from '@/components/ProductCard';
 import ReviewsSection from '@/components/ReviewsSection';
 import RecentlyViewed from '@/components/RecentlyViewed';
@@ -29,6 +30,7 @@ interface DBProduct {
 }
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = useT();
   const { id } = use(params);
 
   const [product, setProduct] = useState<DBProduct | null>(null);
@@ -66,15 +68,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   if (status === 'loading') return (
     <div className="flex items-center justify-center min-h-[40vh] text-(--muted) text-sm">
-      Завантаження...
+      {t.loading}
     </div>
   );
 
   if (status === 'notfound' || !product) return (
     <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
       <div className="text-5xl">😕</div>
-      <p className="text-lg font-bold">Товар не знайдено</p>
-      <Link href="/catalog" className="text-(--accent) hover:underline text-sm">← До каталогу</Link>
+      <p className="text-lg font-bold">{t.notFound}</p>
+      <Link href="/catalog" className="text-(--accent) hover:underline text-sm">← {t.backToCatalog}</Link>
     </div>
   );
 
@@ -95,7 +97,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     <div className="max-w-[1440px] mx-auto px-4 py-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-[13px] text-(--muted) mb-6">
-        <Link href="/" className="hover:text-(--text) transition-colors">Головна</Link>
+        <Link href="/" className="hover:text-(--text) transition-colors">{t.home}</Link>
         <span>/</span>
         <Link href={`/catalog?category=${product.category}`} className="hover:text-(--text) transition-colors">
           {categoryEmojis[cat]} {categoryLabels[cat]}
@@ -151,10 +153,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     <span key={i} style={{ color: i < product.rating ? 'var(--star)' : 'var(--muted)', fontSize: 16 }}>★</span>
                   ))}
                 </div>
-                <span className="text-(--muted) text-sm">{product.reviewCount} відгуків</span>
+                <span className="text-(--muted) text-sm">{product.reviewCount} {t.reviewsCountSuffix}</span>
               </>
             ) : (
-              <span className="text-(--muted) text-sm">Немає відгуків</span>
+              <span className="text-(--muted) text-sm">{t.noReviews}</span>
             )}
           </div>
 
@@ -166,12 +168,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           </div>
 
           <div className={`text-sm font-semibold ${product.inStock ? 'text-green-400' : 'text-red-400'}`}>
-            {product.inStock ? '✓ Є в наявності' : '✗ Немає в наявності'}
+            {product.inStock ? `✓ ${t.inStockFull}` : `✗ ${t.outOfStockFull}`}
           </div>
 
           {product.colors && product.colors.length > 1 && (
             <div>
-              <div className="text-sm font-semibold text-(--muted) mb-2">Колір:</div>
+              <div className="text-sm font-semibold text-(--muted) mb-2">{t.colorLabel}</div>
               <div className="flex gap-2">
                 {product.colors.map((c) => (
                   <button key={c} type="button" onClick={() => setSelectedColor(c)}
@@ -196,16 +198,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 onClick={handleAdd}
                 className={`flex-1 h-11 font-bold text-white rounded transition-all duration-200 ${added ? 'bg-green-700' : 'bg-(--accent) hover:bg-(--accent-hover) hover:-translate-y-0.5'}`}
               >
-                {added ? '✓ Додано до кошику!' : 'В кошик'}
+                {added ? t.addedToCartFull : t.addToCart}
               </button>
               <Link href="/cart" className="h-11 px-5 border border-(--border) rounded font-semibold text-sm text-(--muted) hover:text-(--text) hover:border-(--muted) transition-all flex items-center">
-                🛒 Кошик
+                {t.toCart}
               </Link>
             </div>
           )}
 
           <div className="bg-(--card) rounded-lg p-4 mt-2">
-            <h3 className="font-bold mb-3">Характеристики</h3>
+            <h3 className="font-bold mb-3">{t.specs}</h3>
             <ul className="space-y-2">
               {product.specs.map((spec) => (
                 <li key={spec} className="flex items-center gap-2 text-sm text-(--muted)">
@@ -216,7 +218,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           </div>
 
           <div>
-            <h3 className="font-bold mb-2">Опис</h3>
+            <h3 className="font-bold mb-2">{t.description}</h3>
             <p className="text-(--muted) text-sm leading-relaxed">{product.description}</p>
           </div>
         </div>
@@ -228,7 +230,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       {/* Similar */}
       {similar.length > 0 && (
         <section className="mt-12">
-          <h2 className="text-xl font-bold mb-4">Схожі товари</h2>
+          <h2 className="text-xl font-bold mb-4">{t.similarProducts}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {similar.map((p) => <ProductCard key={p.id} product={p as any} />)}

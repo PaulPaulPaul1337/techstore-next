@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useAuthModalStore } from '@/store/authModalStore';
+import { useT } from '@/hooks/useT';
+import type { Translations } from '@/lib/i18n';
 
 interface Review {
   id: string;
@@ -36,19 +38,20 @@ function Stars({ value, onChange }: { value: number; onChange?: (v: number) => v
   );
 }
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string, t: Translations) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
   const h = Math.floor(m / 60);
   const d = Math.floor(h / 24);
   if (d > 30) return new Date(dateStr).toLocaleDateString('uk-UA');
-  if (d > 0) return `${d} дн. тому`;
-  if (h > 0) return `${h} год. тому`;
-  if (m > 0) return `${m} хв. тому`;
-  return 'щойно';
+  if (d > 0) return t.daysAgo(d);
+  if (h > 0) return t.hoursAgo(h);
+  if (m > 0) return t.minutesAgo(m);
+  return t.justNow;
 }
 
 export default function ReviewsSection({ productId }: { productId: string }) {
+  const t = useT();
   const user = useAuthStore((s) => s.user);
   const openLogin = useAuthModalStore((s) => s.openLogin);
 
@@ -74,21 +77,21 @@ export default function ReviewsSection({ productId }: { productId: string }) {
   }, [productId]);
 
   async function handleDelete(reviewId: string) {
-    if (!confirm('Видалити цей відгук?')) return;
+    if (!confirm(t.confirmDeleteReview)) return;
     const res = await fetch(`/api/reviews/${reviewId}`, { method: 'DELETE' });
     if (res.ok) {
       setReviews((prev) => prev.filter((r) => r.id !== reviewId));
     } else {
-      alert('Помилка видалення відгуку');
+      alert(t.deleteError);
     }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (rating === 0) { setError('Будь ласка, оберіть оцінку'); return; }
-    if (!comment.trim()) { setError('Напишіть відгук'); return; }
-    if (!user && !guestName.trim()) { setError("Вкажіть ваше ім'я"); return; }
+    if (rating === 0) { setError(t.pleaseSelectRating); return; }
+    if (!comment.trim()) { setError(t.pleaseWriteReview); return; }
+    if (!user && !guestName.trim()) { setError(t.pleaseEnterName); return; }
 
     setSubmitting(true);
     const res = await fetch(`/api/products/${productId}/reviews`, {
@@ -98,7 +101,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
     });
     setSubmitting(false);
 
-    if (!res.ok) { setError('Помилка. Спробуйте ще раз'); return; }
+    if (!res.ok) { setError(t.submitError); return; }
     const review = await res.json();
     setReviews((prev) => [review, ...prev]);
     setRating(0);
@@ -120,7 +123,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
     <section className="mt-12">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold">
-          Відгуки{reviews.length > 0 && <span className="text-(--muted) font-normal text-base ml-2">({reviews.length})</span>}
+          {t.reviews}{reviews.length > 0 && <span className="text-(--muted) font-normal text-base ml-2">({reviews.length})</span>}
         </h2>
         <button
           onClick={() => {
@@ -129,7 +132,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
           }}
           className="h-9 px-5 bg-(--accent) hover:bg-(--accent-hover) text-white text-sm font-bold rounded-lg transition-colors"
         >
-          {formOpen ? 'Скасувати' : '+ Написати відгук'}
+          {formOpen ? t.cancel : t.writeReview}
         </button>
       </div>
 
@@ -139,7 +142,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
           <div className="text-center shrink-0">
             <div className="text-5xl font-bold text-(--text)">{avg}</div>
             <Stars value={Math.round(Number(avg))} />
-            <div className="text-xs text-(--muted) mt-1">{reviews.length} відгуків</div>
+            <div className="text-xs text-(--muted) mt-1">{reviews.length} {t.reviewsCountSuffix}</div>
           </div>
           <div className="flex-1 w-full space-y-1.5">
             {dist.map(({ star, count }) => (
@@ -162,33 +165,33 @@ export default function ReviewsSection({ productId }: { productId: string }) {
       {/* Form */}
       {formOpen && (
         <div className="bg-(--card) border border-(--border) rounded-xl p-5 mb-6">
-          <h3 className="font-bold mb-4">Ваш відгук</h3>
+          <h3 className="font-bold mb-4">{t.yourReview}</h3>
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2.5 rounded mb-4">{error}</div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold mb-2">Оцінка</label>
+              <label className="block text-sm font-semibold mb-2">{t.rating}</label>
               <Stars value={rating} onChange={setRating} />
             </div>
             {!user && (
               <div>
-                <label className="block text-sm font-semibold mb-1.5">Ваше ім&apos;я</label>
+                <label className="block text-sm font-semibold mb-1.5">{t.yourName}</label>
                 <input
                   type="text"
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
-                  placeholder="Іван"
+                  placeholder={t.guestNamePlaceholder}
                   className="w-full h-10 border border-(--border) rounded-lg px-3 text-sm outline-none focus:border-(--accent) transition-colors bg-(--card) text-(--text)"
                 />
               </div>
             )}
             <div>
-              <label className="block text-sm font-semibold mb-1.5">Відгук</label>
+              <label className="block text-sm font-semibold mb-1.5">{t.reviewText}</label>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Розкажіть про свій досвід з товаром..."
+                placeholder={t.reviewPlaceholder}
                 rows={4}
                 className="w-full border border-(--border) rounded-lg px-3 py-2.5 text-sm outline-none focus:border-(--accent) transition-colors bg-(--card) text-(--text) resize-none"
               />
@@ -199,14 +202,14 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                 disabled={submitting}
                 className="h-10 px-6 bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-60 text-white font-bold rounded-lg transition-colors text-sm"
               >
-                {submitting ? 'Збереження...' : 'Опублікувати'}
+                {submitting ? t.saving : t.publish}
               </button>
               <button
                 type="button"
                 onClick={() => setFormOpen(false)}
                 className="h-10 px-5 border border-(--border) rounded-lg text-sm text-(--muted) hover:text-(--text) transition-colors"
               >
-                Скасувати
+                {t.cancel}
               </button>
             </div>
           </form>
@@ -215,12 +218,12 @@ export default function ReviewsSection({ productId }: { productId: string }) {
 
       {/* Reviews list */}
       {loading ? (
-        <div className="text-center py-8 text-(--muted)">Завантаження відгуків...</div>
+        <div className="text-center py-8 text-(--muted)">{t.loadingReviews}</div>
       ) : reviews.length === 0 ? (
         <div className="text-center py-12 text-(--muted)">
           <div className="text-4xl mb-3">💬</div>
-          <p className="font-semibold">Відгуків поки немає</p>
-          <p className="text-sm mt-1">Будьте першим, хто залишить відгук</p>
+          <p className="font-semibold">{t.noReviewsYet}</p>
+          <p className="text-sm mt-1">{t.beFirst}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -233,7 +236,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                   </div>
                   <div>
                     <div className="font-semibold text-sm">{r.userName}</div>
-                    <div className="text-xs text-(--muted)">{timeAgo(r.createdAt)}</div>
+                    <div className="text-xs text-(--muted)">{timeAgo(r.createdAt, t)}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -241,7 +244,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                   {user?.isAdmin && (
                     <button
                       onClick={() => handleDelete(r.id)}
-                      title="Видалити відгук"
+                      title={t.confirmDeleteReview}
                       className="text-(--muted) hover:text-(--accent) text-sm transition-colors"
                     >
                       🗑

@@ -11,6 +11,8 @@ import { useCompareStore } from '@/store/compareStore';
 import { useAuthStore } from '@/store/authStore';
 import { useAuthModalStore } from '@/store/authModalStore';
 import { useThemeStore } from '@/store/themeStore';
+import { useLangStore, type Lang } from '@/store/langStore';
+import { useT } from '@/hooks/useT';
 import CatalogMenu from '@/components/CatalogMenu';
 
 function Badge({ count }: { count: number }) {
@@ -52,6 +54,9 @@ export default function Header() {
   const openAccount = useAuthModalStore((s) => s.openAccount);
   const dark = useThemeStore((s) => s.dark);
   const toggleTheme = useThemeStore((s) => s.toggle);
+  const lang = useLangStore((s) => s.lang);
+  const setLang = useLangStore((s) => s.setLang);
+  const t = useT();
 
   function handleSearch(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -101,14 +106,31 @@ export default function Header() {
       <div className="bg-[#1c1c1c] text-[#999] text-xs py-2 hidden md:block">
         <div className="max-w-[1440px] mx-auto px-4 flex justify-between items-center">
           <div className="flex gap-6">
-            <Link href="/delivery" className="hover:text-white transition-colors">Доставка і оплата</Link>
-            <Link href="/warranty" className="hover:text-white transition-colors">Гарантія і повернення</Link>
-            <Link href="/contacts" className="hover:text-white transition-colors">Сервісний центр</Link>
-            <Link href="/catalog?badge=sale" className="hover:text-white transition-colors">Акції</Link>
+            <Link href="/delivery" className="hover:text-white transition-colors">{t.delivery}</Link>
+            <Link href="/warranty" className="hover:text-white transition-colors">{t.warranty}</Link>
+            <Link href="/contacts" className="hover:text-white transition-colors">{t.service}</Link>
+            <Link href="/catalog?badge=sale" className="hover:text-white transition-colors">{t.sales}</Link>
           </div>
-          <div className="flex gap-6 items-center">
+          <div className="flex gap-4 items-center">
             <span className="text-white font-medium">0 800 000 000</span>
             <span>м. Київ</span>
+            {/* Language switcher */}
+            <div className="flex items-center gap-0.5 bg-[#2a2a2a] rounded-md p-0.5">
+              {(['uk', 'ru', 'en'] as Lang[]).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className="px-1.5 py-0.5 rounded text-[11px] font-bold uppercase transition-colors"
+                  style={{
+                    background: lang === l ? '#c42a2c' : 'transparent',
+                    color: lang === l ? '#fff' : '#999',
+                  }}
+                >
+                  {l === 'uk' ? 'UA' : l === 'ru' ? 'RU' : 'EN'}
+                </button>
+              ))}
+            </div>
+            {/* Theme toggle */}
             <button
               onClick={toggleTheme}
               title={dark ? 'Світла тема' : 'Темна тема'}
@@ -139,7 +161,7 @@ export default function Header() {
             onMouseLeave={scheduleClose}
             className="hidden md:flex items-center gap-2 bg-(--accent) text-white px-5 h-10 text-sm font-bold whitespace-nowrap hover:bg-(--accent-hover) transition-colors rounded"
           >
-            ☰ Каталог
+            ☰ {t.catalog}
           </button>
 
           {/* Search */}
@@ -150,7 +172,7 @@ export default function Header() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setShowSuggestions(true)}
-                placeholder="Пошук товарів, брендів..."
+                placeholder={t.searchPlaceholder}
                 autoComplete="off"
                 className="flex-1 h-10 bg-white text-[#111] text-sm px-4 rounded-l outline-none placeholder:text-[#aaa]"
               />
@@ -191,7 +213,7 @@ export default function Header() {
                   onClick={handleSearch}
                   className="w-full px-3 py-2 text-center text-sm font-semibold text-(--accent) hover:bg-(--bg) transition-colors"
                 >
-                  Усі результати для «{query.trim()}» →
+                  {t.allResults(query.trim())}
                 </button>
               </div>
             )}
@@ -207,7 +229,7 @@ export default function Header() {
                 ⚖️
                 <Badge count={compareCount} />
               </span>
-              <span className="text-[10px] mt-0.5 text-white">Порівняння</span>
+              <span className="text-[10px] mt-0.5 text-white">{t.compare}</span>
             </Link>
 
             <Link
@@ -218,7 +240,7 @@ export default function Header() {
                 ♡
                 <Badge count={wishCount} />
               </span>
-              <span className="text-[10px] mt-0.5 text-white">Обране</span>
+              <span className="text-[10px] mt-0.5 text-white">{t.wishlist}</span>
             </Link>
 
             {user ? (
@@ -227,7 +249,7 @@ export default function Header() {
                 className="hidden md:flex flex-col items-center px-3 py-1 text-white hover:text-white transition-colors"
               >
                 <span className="text-lg leading-none">👤</span>
-                <span className="text-[10px] mt-0.5 max-w-[60px] truncate text-white">{user.name.split(' ')[0]}</span>
+                <span className="text-[10px] mt-0.5 max-w-[60px] truncate text-white">{user.name.split(' ')[0] || t.login}</span>
               </button>
             ) : (
               <button
@@ -235,7 +257,7 @@ export default function Header() {
                 className="hidden md:flex flex-col items-center px-3 py-1 text-white hover:text-white transition-colors"
               >
                 <span className="text-lg leading-none">👤</span>
-                <span className="text-[10px] mt-0.5 text-white">Увійти</span>
+                <span className="text-[10px] mt-0.5 text-white">{t.login}</span>
               </button>
             )}
 
@@ -247,7 +269,7 @@ export default function Header() {
                 🛒
                 <Badge count={totalCount} />
               </span>
-              <span className="text-[10px] mt-0.5 text-white">Кошик</span>
+              <span className="text-[10px] mt-0.5 text-white">{t.cart}</span>
             </Link>
           </div>
 
