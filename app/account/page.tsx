@@ -7,8 +7,10 @@ import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCompareStore } from '@/store/compareStore';
+import { useT } from '@/hooks/useT';
 
 export default function AccountPage() {
+  const t = useT();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const loading = useAuthStore((s) => s.loading);
@@ -23,7 +25,7 @@ export default function AccountPage() {
   }, [user, loading, router]);
 
   if (loading) return (
-    <div className="flex items-center justify-center h-40 text-(--muted)">Завантаження...</div>
+    <div className="flex items-center justify-center h-40 text-(--muted)">{t.loading}</div>
   );
   if (!user) return null;
 
@@ -34,7 +36,7 @@ export default function AccountPage() {
 
   return (
     <div className="max-w-[900px] mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Мій акаунт</h1>
+      <h1 className="text-2xl font-bold mb-6">{t.myAccount}</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Profile card */}
@@ -48,7 +50,7 @@ export default function AccountPage() {
               <div className="text-(--muted) text-sm">{user.email}</div>
               {user.isAdmin && (
                 <span className="inline-block mt-2 bg-(--accent) text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-                  Адміністратор
+                  {t.administrator}
                 </span>
               )}
             </div>
@@ -56,7 +58,7 @@ export default function AccountPage() {
               onClick={handleLogout}
               className="w-full h-9 border border-(--border) rounded-lg text-sm text-(--muted) hover:text-(--accent) hover:border-(--accent) transition-colors font-semibold"
             >
-              Вийти з акаунту
+              {t.logout}
             </button>
           </div>
         </div>
@@ -66,9 +68,9 @@ export default function AccountPage() {
           {/* Quick stats */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: 'Кошик', value: cartCount, sub: `${cartTotal.toLocaleString('uk-UA')} ₴`, href: '/cart', icon: '🛒' },
-              { label: 'Обране', value: wishCount, sub: 'товарів', href: '/wishlist', icon: '♡' },
-              { label: 'Порівняння', value: compareCount, sub: 'товарів', href: '/compare', icon: '⚖️' },
+              { label: t.cart, value: cartCount, sub: `${cartTotal.toLocaleString('uk-UA')} ₴`, href: '/cart', icon: '🛒' },
+              { label: t.wishlist, value: wishCount, sub: t.productsWord, href: '/wishlist', icon: '♡' },
+              { label: t.compare, value: compareCount, sub: t.productsWord, href: '/compare', icon: '⚖️' },
             ].map(({ label, value, sub, href, icon }) => (
               <Link
                 key={label}
@@ -86,12 +88,12 @@ export default function AccountPage() {
           {/* Menu items */}
           <div className="bg-(--card) border border-(--border) rounded-xl overflow-hidden">
             {[
-              { label: '🛒 Кошик', href: '/cart' },
-              { label: '♡ Список обраного', href: '/wishlist' },
-              { label: '⚖️ Порівняння товарів', href: '/compare' },
-              { label: '📦 Каталог товарів', href: '/catalog' },
-              { label: '🧾 Історія покупок', href: '/account/orders' },
-              ...(user.isAdmin ? [{ label: '⚙️ Панель адміністратора', href: '/admin' }] : []),
+              { label: t.navCart, href: '/cart' },
+              { label: t.navWishlist, href: '/wishlist' },
+              { label: t.navCompare, href: '/compare' },
+              { label: t.navCatalog, href: '/catalog' },
+              { label: t.navOrders, href: '/account/orders' },
+              ...(user.isAdmin ? [{ label: t.navAdmin, href: '/admin' }] : []),
             ].map(({ label, href }, idx, arr) => (
               <Link
                 key={href}

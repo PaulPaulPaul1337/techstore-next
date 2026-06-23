@@ -52,6 +52,9 @@ export default function AdminPage() {
           <p className="text-(--muted) text-sm mt-1">Управління товарами магазину</p>
         </div>
         <div className="flex gap-2">
+          <Link href="/admin/orders" className="bg-(--bg) border border-(--border) hover:border-(--accent) text-(--text) font-bold px-5 py-2.5 rounded-lg transition-colors text-sm">
+            📋 Замовлення
+          </Link>
           <Link href="/admin/slides" className="bg-(--bg) border border-(--border) hover:border-(--accent) text-(--text) font-bold px-5 py-2.5 rounded-lg transition-colors text-sm">
             🖼 Слайди
           </Link>

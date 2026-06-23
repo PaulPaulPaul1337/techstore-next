@@ -1,14 +1,22 @@
-// GET  /api/orders  → list current user's orders (newest first)
-// POST /api/orders  → create a new order
+// GET  /api/orders         → list current user's orders (newest first)
+// GET  /api/orders?all=1   → list all orders, admin only (newest first)
+// POST /api/orders         → create a new order
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: Request) {
   const session = await getSession();
   if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const { searchParams } = new URL(req.url);
+  const wantsAll = searchParams.get('all') === '1';
+
+  if (wantsAll && !session.isAdmin) {
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const orders = await prisma.order.findMany({
-    where: { userId: session.userId },
+    where: wantsAll ? {} : { userId: session.userId },
     orderBy: { createdAt: 'desc' },
     include: { items: true },
   });

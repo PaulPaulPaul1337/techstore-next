@@ -3,75 +3,79 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Category, categoryLabels, categoryEmojis } from '@/data/products';
+import { useT } from '@/hooks/useT';
+import { getCategoryLabels, type Translations } from '@/lib/i18n';
 
 const categories = Object.keys(categoryLabels) as Category[];
 
-const categoryMeta: Record<Category, { brands: string[]; highlights: { label: string; href: string }[] }> = {
-  smartphones: {
-    brands: ['Apple', 'Samsung', 'Google', 'Xiaomi', 'Sony'],
-    highlights: [
-      { label: 'Новинки', href: '/catalog?category=smartphones&badge=new' },
-      { label: 'Акції', href: '/catalog?category=smartphones&badge=sale' },
-      { label: 'Хіти продажів', href: '/catalog?category=smartphones&badge=hit' },
-    ],
-  },
-  laptops: {
-    brands: ['Apple', 'ASUS', 'Dell', 'Lenovo', 'HP'],
-    highlights: [
-      { label: 'Для роботи', href: '/catalog?category=laptops' },
-      { label: 'Ігрові', href: '/catalog?category=laptops&badge=hit' },
-      { label: 'Акції', href: '/catalog?category=laptops&badge=sale' },
-    ],
-  },
-  monitors: {
-    brands: ['Samsung', 'LG', 'Dell', 'ASUS', 'AOC'],
-    highlights: [
-      { label: '4K монітори', href: '/catalog?category=monitors' },
-      { label: 'Ігрові 144Hz+', href: '/catalog?category=monitors&badge=new' },
-      { label: 'Акції', href: '/catalog?category=monitors&badge=sale' },
-    ],
-  },
-  headphones: {
-    brands: ['Sony', 'Apple', 'Bose', 'Sennheiser', 'JBL'],
-    highlights: [
-      { label: 'З шумоподавленням', href: '/catalog?category=headphones' },
-      { label: 'Бездротові', href: '/catalog?category=headphones&badge=hit' },
-      { label: 'Акції', href: '/catalog?category=headphones&badge=sale' },
-    ],
-  },
-  cameras: {
-    brands: ['Sony', 'Canon', 'Nikon', 'Fujifilm', 'Panasonic'],
-    highlights: [
-      { label: 'Повнокадрові', href: '/catalog?category=cameras' },
-      { label: 'Для відео', href: '/catalog?category=cameras&badge=hit' },
-      { label: 'Акції', href: '/catalog?category=cameras&badge=sale' },
-    ],
-  },
-  consoles: {
-    brands: ['Sony', 'Microsoft', 'Nintendo'],
-    highlights: [
-      { label: 'PlayStation 5', href: '/catalog?category=consoles' },
-      { label: 'Xbox Series', href: '/catalog?category=consoles&badge=hit' },
-      { label: 'Акції', href: '/catalog?category=consoles&badge=sale' },
-    ],
-  },
-  watches: {
-    brands: ['Apple', 'Samsung', 'Garmin', 'Fitbit', 'Xiaomi'],
-    highlights: [
-      { label: 'Apple Watch', href: '/catalog?category=watches' },
-      { label: 'Спортивні', href: '/catalog?category=watches&badge=hit' },
-      { label: 'Акції', href: '/catalog?category=watches&badge=sale' },
-    ],
-  },
-  accessories: {
-    brands: ['Apple', 'Logitech', 'Anker', 'Belkin', 'Samsung'],
-    highlights: [
-      { label: 'Клавіатури та миші', href: '/catalog?category=accessories' },
-      { label: 'Зарядні пристрої', href: '/catalog?category=accessories&badge=hit' },
-      { label: 'Акції', href: '/catalog?category=accessories&badge=sale' },
-    ],
-  },
-};
+function getCategoryMeta(t: Translations): Record<Category, { brands: string[]; highlights: { label: string; href: string }[] }> {
+  return {
+    smartphones: {
+      brands: ['Apple', 'Samsung', 'Google', 'Xiaomi', 'Sony'],
+      highlights: [
+        { label: t.newArrivals, href: '/catalog?category=smartphones&badge=new' },
+        { label: t.sales, href: '/catalog?category=smartphones&badge=sale' },
+        { label: t.bestSellers, href: '/catalog?category=smartphones&badge=hit' },
+      ],
+    },
+    laptops: {
+      brands: ['Apple', 'ASUS', 'Dell', 'Lenovo', 'HP'],
+      highlights: [
+        { label: t.forWork, href: '/catalog?category=laptops' },
+        { label: t.gaming, href: '/catalog?category=laptops&badge=hit' },
+        { label: t.sales, href: '/catalog?category=laptops&badge=sale' },
+      ],
+    },
+    monitors: {
+      brands: ['Samsung', 'LG', 'Dell', 'ASUS', 'AOC'],
+      highlights: [
+        { label: t.monitors4k, href: '/catalog?category=monitors' },
+        { label: t.gaming144hz, href: '/catalog?category=monitors&badge=new' },
+        { label: t.sales, href: '/catalog?category=monitors&badge=sale' },
+      ],
+    },
+    headphones: {
+      brands: ['Sony', 'Apple', 'Bose', 'Sennheiser', 'JBL'],
+      highlights: [
+        { label: t.withNoiseCancelling, href: '/catalog?category=headphones' },
+        { label: t.wireless, href: '/catalog?category=headphones&badge=hit' },
+        { label: t.sales, href: '/catalog?category=headphones&badge=sale' },
+      ],
+    },
+    cameras: {
+      brands: ['Sony', 'Canon', 'Nikon', 'Fujifilm', 'Panasonic'],
+      highlights: [
+        { label: t.fullFrame, href: '/catalog?category=cameras' },
+        { label: t.forVideo, href: '/catalog?category=cameras&badge=hit' },
+        { label: t.sales, href: '/catalog?category=cameras&badge=sale' },
+      ],
+    },
+    consoles: {
+      brands: ['Sony', 'Microsoft', 'Nintendo'],
+      highlights: [
+        { label: 'PlayStation 5', href: '/catalog?category=consoles' },
+        { label: 'Xbox Series', href: '/catalog?category=consoles&badge=hit' },
+        { label: t.sales, href: '/catalog?category=consoles&badge=sale' },
+      ],
+    },
+    watches: {
+      brands: ['Apple', 'Samsung', 'Garmin', 'Fitbit', 'Xiaomi'],
+      highlights: [
+        { label: 'Apple Watch', href: '/catalog?category=watches' },
+        { label: t.sport, href: '/catalog?category=watches&badge=hit' },
+        { label: t.sales, href: '/catalog?category=watches&badge=sale' },
+      ],
+    },
+    accessories: {
+      brands: ['Apple', 'Logitech', 'Anker', 'Belkin', 'Samsung'],
+      highlights: [
+        { label: t.keyboardsMice, href: '/catalog?category=accessories' },
+        { label: t.chargers, href: '/catalog?category=accessories&badge=hit' },
+        { label: t.sales, href: '/catalog?category=accessories&badge=sale' },
+      ],
+    },
+  };
+}
 
 interface Props {
   isOpen: boolean;
@@ -81,6 +85,7 @@ interface Props {
 }
 
 export default function CatalogMenu({ isOpen, onClose, onMouseEnter, onMouseLeave }: Props) {
+  const t = useT();
   const [activeCategory, setActiveCategory] = useState<Category>('smartphones');
   const [visible, setVisible] = useState(false);
 
@@ -93,7 +98,9 @@ export default function CatalogMenu({ isOpen, onClose, onMouseEnter, onMouseLeav
 
   if (!isOpen) return null;
 
+  const categoryMeta = getCategoryMeta(t);
   const meta = categoryMeta[activeCategory];
+  const catLabels = getCategoryLabels(t);
 
   return (
     <div className="fixed inset-0 z-[60] flex flex-col">
@@ -140,7 +147,7 @@ export default function CatalogMenu({ isOpen, onClose, onMouseEnter, onMouseLeav
                     className="flex items-center gap-3 flex-1"
                   >
                     <span className="text-lg w-6 text-center">{categoryEmojis[cat]}</span>
-                    {categoryLabels[cat]}
+                    {catLabels[cat]}
                   </Link>
                   <span className="text-(--muted) text-base ml-2">›</span>
                 </button>
@@ -151,20 +158,20 @@ export default function CatalogMenu({ isOpen, onClose, onMouseEnter, onMouseLeav
             <div className="flex-1 p-6 overflow-y-auto">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-lg font-bold text-(--text)">
-                  {categoryEmojis[activeCategory]} {categoryLabels[activeCategory]}
+                  {categoryEmojis[activeCategory]} {catLabels[activeCategory]}
                 </h3>
                 <Link
                   href={`/catalog?category=${activeCategory}`}
                   onClick={onClose}
                   className="text-sm text-(--accent) hover:underline font-semibold"
                 >
-                  Переглянути всі →
+                  {t.viewAll}
                 </Link>
               </div>
 
               {/* Brands */}
               <div className="mb-6">
-                <p className="text-xs font-semibold text-(--muted) uppercase tracking-wider mb-3">Бренди</p>
+                <p className="text-xs font-semibold text-(--muted) uppercase tracking-wider mb-3">{t.brandsLabel}</p>
                 <div className="flex flex-wrap gap-2">
                   {meta.brands.map((brand) => (
                     <Link
@@ -181,11 +188,11 @@ export default function CatalogMenu({ isOpen, onClose, onMouseEnter, onMouseLeav
 
               {/* Highlights */}
               <div>
-                <p className="text-xs font-semibold text-(--muted) uppercase tracking-wider mb-3">Підбірки</p>
+                <p className="text-xs font-semibold text-(--muted) uppercase tracking-wider mb-3">{t.collectionsLabel}</p>
                 <div className="flex flex-col gap-1">
                   {meta.highlights.map(({ label, href }) => (
                     <Link
-                      key={label}
+                      key={href}
                       href={href}
                       onClick={onClose}
                       className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-(--bg) text-[14px] text-(--text) hover:text-(--accent) transition-colors font-medium"

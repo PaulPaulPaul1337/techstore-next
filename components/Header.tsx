@@ -133,7 +133,7 @@ export default function Header() {
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              title={dark ? 'Світла тема' : 'Темна тема'}
+              title={dark ? t.lightTheme : t.darkTheme}
               className="w-8 h-[18px] rounded-full relative transition-colors duration-300 flex items-center shrink-0"
               style={{ background: dark ? '#c42a2c' : '#444' }}
             >

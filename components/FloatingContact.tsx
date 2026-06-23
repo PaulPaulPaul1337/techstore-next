@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useT } from '@/hooks/useT';
 
 const messengers = [
   {
@@ -36,6 +37,7 @@ const messengers = [
 ];
 
 export default function FloatingContact() {
+  const t = useT();
   const [chatOpen, setChatOpen] = useState(false);
   const [callbackOpen, setCallbackOpen] = useState(false);
   const [phone, setPhone] = useState('');
@@ -81,7 +83,7 @@ export default function FloatingContact() {
       {callbackOpen && (
         <div className="bg-(--card) border border-(--border) rounded-2xl shadow-2xl p-5 w-[280px] mb-1">
           <div className="flex items-center justify-between mb-3">
-            <span className="font-bold text-(--text) text-sm">Замовити дзвінок</span>
+            <span className="font-bold text-(--text) text-sm">{t.orderCallback}</span>
             <button
               onClick={() => { setCallbackOpen(false); setSent(false); setPhone(''); }}
               className="text-(--muted) hover:text-(--text) transition-colors text-lg leading-none"
@@ -92,12 +94,12 @@ export default function FloatingContact() {
           {sent ? (
             <div className="text-center py-3">
               <div className="text-3xl mb-2">✅</div>
-              <p className="text-sm font-semibold text-(--text)">Дякуємо!</p>
-              <p className="text-xs text-(--muted) mt-1">Ми зателефонуємо вам найближчим часом</p>
+              <p className="text-sm font-semibold text-(--text)">{t.thankYou}</p>
+              <p className="text-xs text-(--muted) mt-1">{t.callbackSoon}</p>
             </div>
           ) : (
             <form onSubmit={handleCallbackSubmit} className="space-y-3">
-              <p className="text-xs text-(--muted)">Вкажіть ваш номер — ми передзвонимо протягом 10 хвилин</p>
+              <p className="text-xs text-(--muted)">{t.enterPhone}</p>
               <input
                 type="tel"
                 value={phone}
@@ -111,7 +113,7 @@ export default function FloatingContact() {
                 type="submit"
                 className="w-full h-10 bg-(--accent) hover:bg-(--accent-hover) text-white font-bold rounded-lg transition-colors text-sm"
               >
-                Передзвоніть мені
+                {t.callBackMe}
               </button>
             </form>
           )}
@@ -123,7 +125,7 @@ export default function FloatingContact() {
         {/* Callback button */}
         <button
           onClick={() => { setCallbackOpen((v) => !v); setChatOpen(false); }}
-          title="Замовити дзвінок"
+          title={t.orderCallback}
           className="w-14 h-14 rounded-full bg-(--accent) hover:bg-(--accent-hover) text-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
         >
           <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -134,7 +136,7 @@ export default function FloatingContact() {
         {/* Chat button */}
         <button
           onClick={() => { setChatOpen((v) => !v); setCallbackOpen(false); }}
-          title="Написати нам"
+          title={t.writeUs}
           className="w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
           style={{ transform: chatOpen ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.3s, background 0.2s' }}
         >

@@ -3,38 +3,22 @@
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { categoryLabels, categoryEmojis } from '@/data/products';
+import { categoryEmojis } from '@/data/products';
+import type { Product } from '@/data/products';
 import { useCartStore } from '@/store/cartStore';
 import { useViewHistoryStore } from '@/store/viewHistoryStore';
 import { useT } from '@/hooks/useT';
+import { getCategoryLabels } from '@/lib/i18n';
 import ProductCard from '@/components/ProductCard';
 import ReviewsSection from '@/components/ReviewsSection';
 import RecentlyViewed from '@/components/RecentlyViewed';
-
-interface DBProduct {
-  id: string;
-  name: string;
-  brand: string;
-  category: string;
-  price: number;
-  oldPrice?: number | null;
-  emoji: string;
-  image: string;
-  badge?: string | null;
-  specs: string[];
-  description: string;
-  inStock: boolean;
-  colors: string[];
-  rating: number;
-  reviewCount: number;
-}
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const t = useT();
   const { id } = use(params);
 
-  const [product, setProduct] = useState<DBProduct | null>(null);
-  const [similar, setSimilar] = useState<DBProduct[]>([]);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [similar, setSimilar] = useState<Product[]>([]);
   const [status, setStatus] = useState<'loading' | 'ok' | 'notfound'>('loading');
 
   const addItem = useCartStore((s) => s.addItem);
@@ -50,7 +34,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         if (!r.ok) { setStatus('notfound'); return null; }
         return r.json();
       })
-      .then((data: DBProduct | null) => {
+      .then((data: Product | null) => {
         if (!data) return;
         setProduct(data);
         setSelectedColor(data.colors?.[0] ?? null);
@@ -58,7 +42,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         addView(data.id);
         fetch(`/api/products?category=${data.category}`)
           .then((r) => r.json())
-          .then((all: DBProduct[]) =>
+          .then((all: Product[]) =>
             setSimilar(all.filter((p) => p.id !== data.id).slice(0, 4))
           )
           .catch(() => {});
@@ -80,15 +64,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     </div>
   );
 
-  const cat = product.category as keyof typeof categoryLabels;
+  const catLabels = getCategoryLabels(t);
+  const cat = product.category as keyof typeof catLabels;
   const discount = product.oldPrice
     ? Math.round((1 - product.price / product.oldPrice) * 100)
     : null;
 
   function handleAdd() {
     if (!product!.inStock) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (let i = 0; i < qty; i++) addItem(product as any);
+    for (let i = 0; i < qty; i++) addItem(product!);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }
@@ -100,7 +84,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <Link href="/" className="hover:text-(--text) transition-colors">{t.home}</Link>
         <span>/</span>
         <Link href={`/catalog?category=${product.category}`} className="hover:text-(--text) transition-colors">
-          {categoryEmojis[cat]} {categoryLabels[cat]}
+          {categoryEmojis[cat]} {catLabels[cat]}
         </Link>
         <span>/</span>
         <span className="text-(--text) truncate max-w-xs">{product.name}</span>
@@ -232,8 +216,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <section className="mt-12">
           <h2 className="text-xl font-bold mb-4">{t.similarProducts}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {similar.map((p) => <ProductCard key={p.id} product={p as any} />)}
+            {similar.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         </section>
       )}

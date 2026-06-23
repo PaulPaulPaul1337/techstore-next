@@ -1,11 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCartStore } from '@/store/cartStore';
-import { products } from '@/data/products';
-import { useAdminProductsStore } from '@/store/adminProductsStore';
+import type { Product } from '@/data/products';
 import { useT } from '@/hooks/useT';
 
 export default function WishlistPage() {
@@ -13,9 +13,16 @@ export default function WishlistPage() {
   const ids = useWishlistStore((s) => s.ids);
   const toggle = useWishlistStore((s) => s.toggle);
   const addItem = useCartStore((s) => s.addItem);
-  const adminProducts = useAdminProductsStore((s) => s.products);
 
-  const allProducts = [...products, ...adminProducts];
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((data: Product[]) => setAllProducts(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
   const wishItems = allProducts.filter((p) => ids.includes(p.id));
 
   return (

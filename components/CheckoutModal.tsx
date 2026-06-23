@@ -3,14 +3,18 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
+import { useT } from '@/hooks/useT';
+import type { Translations } from '@/lib/i18n';
 
 type PaymentMethod = 'card' | 'cash' | 'apay';
 
-const paymentMethods: { id: PaymentMethod; label: string; icon: string; desc: string }[] = [
-  { id: 'card', label: 'Банківська картка', icon: '💳', desc: 'Visa / Mastercard' },
-  { id: 'apay', label: 'Apple Pay / Google Pay', icon: '📱', desc: 'Оплата зі смартфону' },
-  { id: 'cash', label: 'Оплата при отриманні', icon: '💵', desc: 'Готівка або картка курʼєру' },
-];
+function getPaymentMethods(t: Translations): { id: PaymentMethod; label: string; icon: string; desc: string }[] {
+  return [
+    { id: 'card', label: t.pmCard, icon: '💳', desc: t.pmCardDesc },
+    { id: 'apay', label: t.pmApay, icon: '📱', desc: t.pmApayDesc },
+    { id: 'cash', label: t.pmCash, icon: '💵', desc: t.pmCashDesc },
+  ];
+}
 
 function formatCardNumber(v: string) {
   return v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
@@ -23,8 +27,10 @@ function formatExpiry(v: string) {
 }
 
 export default function CheckoutModal({ onClose }: { onClose: () => void }) {
+  const t = useT();
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCartStore();
+  const paymentMethods = getPaymentMethods(t);
 
   const [visible, setVisible] = useState(false);
   const [method, setMethod] = useState<PaymentMethod>('card');
@@ -56,15 +62,15 @@ export default function CheckoutModal({ onClose }: { onClose: () => void }) {
     setError('');
 
     if (!name.trim() || !phone.trim() || !address.trim()) {
-      setError('Заповніть усі поля доставки');
+      setError(t.fillAllFields);
       return;
     }
 
     if (method === 'card') {
       const digits = cardNumber.replace(/\s/g, '');
-      if (digits.length !== 16) { setError('Невірний номер картки'); return; }
-      if (!/^\d{2}\/\d{2}$/.test(cardExpiry)) { setError('Невірний термін дії картки'); return; }
-      if (cardCvv.length !== 3) { setError('Невірний CVV код'); return; }
+      if (digits.length !== 16) { setError(t.invalidCardNumber); return; }
+      if (!/^\d{2}\/\d{2}$/.test(cardExpiry)) { setError(t.invalidCardExpiry); return; }
+      if (cardCvv.length !== 3) { setError(t.invalidCVV); return; }
     }
 
     setSubmitting(true);
@@ -90,7 +96,7 @@ export default function CheckoutModal({ onClose }: { onClose: () => void }) {
 
     if (!res.ok) {
       setSubmitting(false);
-      setError('Помилка оформлення замовлення. Спробуйте ще раз');
+      setError(t.checkoutError);
       return;
     }
 
@@ -131,7 +137,7 @@ export default function CheckoutModal({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-(--border)">
-          <h2 className="text-lg font-bold">Оформлення замовлення</h2>
+          <h2 className="text-lg font-bold">{t.checkoutTitle}</h2>
           <button
             onClick={handleClose}
             className="w-9 h-9 flex items-center justify-center text-(--muted) hover:text-(--text) transition-colors text-xl rounded-full hover:bg-(--bg)"
@@ -149,24 +155,24 @@ export default function CheckoutModal({ onClose }: { onClose: () => void }) {
 
               {/* Delivery info */}
               <div className="space-y-3">
-                <h3 className="text-sm font-bold text-(--muted) uppercase tracking-wide">Дані для доставки</h3>
+                <h3 className="text-sm font-bold text-(--muted) uppercase tracking-wide">{t.deliveryInfoSection}</h3>
                 <div>
-                  <label className="block text-sm font-semibold mb-1.5">Ім&apos;я та прізвище</label>
+                  <label className="block text-sm font-semibold mb-1.5">{t.fullName}</label>
                   <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Іван Петренко" className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1.5">Телефон</label>
+                  <label className="block text-sm font-semibold mb-1.5">{t.phoneLabel}</label>
                   <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+380 99 123 45 67" className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1.5">Адреса доставки</label>
+                  <label className="block text-sm font-semibold mb-1.5">{t.deliveryAddress}</label>
                   <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="м. Київ, Нова Пошта №1" className={inputClass} />
                 </div>
               </div>
 
               {/* Payment methods */}
               <div className="space-y-3">
-                <h3 className="text-sm font-bold text-(--muted) uppercase tracking-wide">Спосіб оплати</h3>
+                <h3 className="text-sm font-bold text-(--muted) uppercase tracking-wide">{t.paymentMethodSection}</h3>
                 <div className="space-y-2">
                   {paymentMethods.map((m) => (
                     <label
@@ -196,13 +202,13 @@ export default function CheckoutModal({ onClose }: { onClose: () => void }) {
               {method === 'card' && (
                 <div className="space-y-3 border border-(--border) rounded-lg p-4 bg-(--bg)">
                   <div className="flex items-center justify-between mb-1">
-                    <h4 className="text-sm font-bold">Дані картки</h4>
+                    <h4 className="text-sm font-bold">{t.cardDataSection}</h4>
                     <span className="text-[11px] text-(--muted) bg-(--card) border border-(--border) px-2 py-0.5 rounded-full">
-                      Тестовий режим
+                      {t.testMode}
                     </span>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1.5 text-(--muted)">Номер картки</label>
+                    <label className="block text-xs font-semibold mb-1.5 text-(--muted)">{t.cardNumberLabel}</label>
                     <input
                       value={cardNumber}
                       onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
@@ -213,7 +219,7 @@ export default function CheckoutModal({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold mb-1.5 text-(--muted)">Термін дії</label>
+                      <label className="block text-xs font-semibold mb-1.5 text-(--muted)">{t.cardExpiryLabel}</label>
                       <input
                         value={cardExpiry}
                         onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
@@ -223,7 +229,7 @@ export default function CheckoutModal({ onClose }: { onClose: () => void }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold mb-1.5 text-(--muted)">CVV</label>
+                      <label className="block text-xs font-semibold mb-1.5 text-(--muted)">{t.cardCvvLabel}</label>
                       <input
                         value={cardCvv}
                         onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 3))}
@@ -234,18 +240,18 @@ export default function CheckoutModal({ onClose }: { onClose: () => void }) {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1.5 text-(--muted)">Ім&apos;я власника картки</label>
+                    <label className="block text-xs font-semibold mb-1.5 text-(--muted)">{t.cardHolderLabel}</label>
                     <input value={cardName} onChange={(e) => setCardName(e.target.value)} placeholder="TEST USER" className={inputClass} />
                   </div>
                   <p className="text-[11px] text-(--muted)">
-                    Це демонстраційна форма оплати, реальне списання коштів не відбувається.
+                    {t.demoPaymentNote}
                   </p>
                 </div>
               )}
 
               {/* Total */}
               <div className="border-t border-(--border) pt-4 flex justify-between items-center">
-                <span className="font-bold">До сплати</span>
+                <span className="font-bold">{t.toPay}</span>
                 <span className="text-xl font-bold text-(--accent)">{total.toLocaleString('uk-UA')} ₴</span>
               </div>
 
@@ -254,7 +260,7 @@ export default function CheckoutModal({ onClose }: { onClose: () => void }) {
             disabled={submitting || items.length === 0}
             className="w-full h-12 bg-(--accent) hover:bg-(--accent-hover) disabled:opacity-60 text-white font-bold rounded-lg transition-all duration-200"
           >
-            {submitting ? 'Обробка...' : `Підтвердити замовлення · ${total.toLocaleString('uk-UA')} ₴`}
+            {submitting ? t.processing : t.confirmOrder(total.toLocaleString('uk-UA'))}
           </button>
         </form>
       </div>

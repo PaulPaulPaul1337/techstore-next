@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { useViewHistoryStore } from '@/store/viewHistoryStore';
 import ProductCard from '@/components/ProductCard';
 import { Product } from '@/data/products';
+import { useT } from '@/hooks/useT';
 
 export default function RecentlyViewed({ excludeId, limit = 8, className = 'mt-12' }: { excludeId?: string; limit?: number; className?: string }) {
+  const t = useT();
   const ids = useViewHistoryStore((s) => s.ids);
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -29,7 +31,7 @@ export default function RecentlyViewed({ excludeId, limit = 8, className = 'mt-1
 
   return (
     <section className={className}>
-      <h2 className="text-xl font-bold mb-4">Ви недавно дивились</h2>
+      <h2 className="text-xl font-bold mb-4">{t.recentlyViewed}</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {products.map((p) => <ProductCard key={p.id} product={p} />)}
       </div>

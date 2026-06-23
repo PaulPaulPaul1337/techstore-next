@@ -7,6 +7,7 @@ import ProductCard from '@/components/ProductCard';
 import { categoryLabels, categoryEmojis, Category } from '@/data/products';
 import type { Product } from '@/data/products';
 import { useT } from '@/hooks/useT';
+import { getCategoryLabels } from '@/lib/i18n';
 
 const categories = Object.keys(categoryLabels) as Category[];
 
@@ -88,10 +89,12 @@ function CatalogContent() {
     { value: 'sale', label: t.badgeSale },
   ];
 
+  const catLabels = getCategoryLabels(t);
+
   const pageTitle =
     badge === 'sale' ? t.salePageTitle
     : badge === 'hit' ? t.hitPageTitle
-    : category ? `${categoryEmojis[category as Category]} ${categoryLabels[category as Category]}`
+    : category ? `${categoryEmojis[category as Category]} ${catLabels[category as Category]}`
     : search ? t.searchTitle(search)
     : t.allCatalog;
 
@@ -131,7 +134,7 @@ function CatalogContent() {
                   onClick={() => setCategory(cat)}
                   className={`text-left px-2.5 py-2 rounded text-[13px] transition-colors ${category === cat ? 'bg-(--accent) text-white font-semibold' : 'text-(--muted) hover:text-(--text) hover:bg-(--card)'}`}
                 >
-                  {categoryEmojis[cat]} {categoryLabels[cat]}
+                  {categoryEmojis[cat]} {catLabels[cat]}
                 </button>
               ))}
             </div>

@@ -1,6 +1,6 @@
 // JWT helpers for authentication
 // Uses jose (works in Edge runtime and Node.js)
-import { SignJWT, jwtVerify } from 'jose';
+import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import { cookies } from 'next/headers';
 
 const SECRET = new TextEncoder().encode(
@@ -16,7 +16,7 @@ const COOKIE_OPTIONS = {
   path: '/',
 };
 
-export interface TokenPayload {
+export interface TokenPayload extends JWTPayload {
   userId: string;
   isAdmin: boolean;
 }

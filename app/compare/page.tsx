@@ -1,11 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCompareStore } from '@/store/compareStore';
 import { useCartStore } from '@/store/cartStore';
-import { products } from '@/data/products';
-import { useAdminProductsStore } from '@/store/adminProductsStore';
+import type { Product } from '@/data/products';
 import { useT } from '@/hooks/useT';
 
 export default function ComparePage() {
@@ -14,10 +14,17 @@ export default function ComparePage() {
   const toggle = useCompareStore((s) => s.toggle);
   const clear = useCompareStore((s) => s.clear);
   const addItem = useCartStore((s) => s.addItem);
-  const adminProducts = useAdminProductsStore((s) => s.products);
 
-  const allProducts = [...products, ...adminProducts];
-  const compareItems = ids.map((id) => allProducts.find((p) => p.id === id)).filter(Boolean) as typeof products;
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((data: Product[]) => setAllProducts(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  const compareItems = ids.map((id) => allProducts.find((p) => p.id === id)).filter((p): p is Product => Boolean(p));
 
   if (compareItems.length === 0) {
     return (

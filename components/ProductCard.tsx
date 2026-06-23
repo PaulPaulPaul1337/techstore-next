@@ -8,15 +8,19 @@ import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCompareStore } from '@/store/compareStore';
 import { useT } from '@/hooks/useT';
+import type { Translations } from '@/lib/i18n';
 
-const badgeConfig = {
-  new:  { label: 'Новинка', bg: 'var(--badge-purple)' },
-  hit:  { label: 'Хіт',     bg: '#e68a00' },
-  sale: { label: 'Акція',   bg: 'var(--accent)' },
-};
+function getBadgeConfig(t: Translations) {
+  return {
+    new:  { label: t.badgeNewLabel, bg: 'var(--badge-purple)' },
+    hit:  { label: t.badgeHitLabel, bg: '#e68a00' },
+    sale: { label: t.badgeSaleLabel, bg: 'var(--accent)' },
+  };
+}
 
 export default function ProductCard({ product }: { product: Product }) {
   const t = useT();
+  const badgeConfig = getBadgeConfig(t);
   const addItem = useCartStore((s) => s.addItem);
   const [added, setAdded] = useState(false);
 
@@ -47,7 +51,7 @@ export default function ProductCard({ product }: { product: Product }) {
   function handleCompare(e: React.MouseEvent) {
     e.preventDefault();
     const ok = toggleCompare(product.id);
-    if (!ok) alert('Можна порівнювати не більше 4 товарів');
+    if (!ok) alert(t.compareMax);
   }
 
   return (
@@ -85,7 +89,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={handleWishlist}
-            title={inWishlist ? 'Видалити з обраного' : 'Додати в обране'}
+            title={inWishlist ? t.removeFromWishlist : t.addToWishlist}
             className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center text-sm hover:scale-110 transition-transform"
             style={{ color: inWishlist ? '#c42a2c' : '#aaa' }}
           >
@@ -93,7 +97,7 @@ export default function ProductCard({ product }: { product: Product }) {
           </button>
           <button
             onClick={handleCompare}
-            title={inCompare ? 'Видалити з порівняння' : 'Додати до порівняння'}
+            title={inCompare ? t.removeFromCompare : t.addToCompare}
             className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center text-sm hover:scale-110 transition-transform"
             style={{ color: inCompare ? '#2563eb' : '#aaa' }}
           >
