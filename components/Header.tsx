@@ -81,9 +81,9 @@ export default function Header() {
       return;
     }
     const timer = setTimeout(() => {
-      fetch(`/api/products?q=${encodeURIComponent(q)}`)
+      fetch(`/api/products?q=${encodeURIComponent(q)}&limit=6`)
         .then((r) => r.json())
-        .then((data: Product[]) => setSuggestions(Array.isArray(data) ? data.slice(0, 6) : []))
+        .then((data: Product[]) => setSuggestions(Array.isArray(data) ? data : []))
         .catch(() => setSuggestions([]));
     }, 250);
     return () => clearTimeout(timer);

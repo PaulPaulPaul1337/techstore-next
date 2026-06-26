@@ -40,11 +40,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         setSelectedColor(data.colors?.[0] ?? null);
         setStatus('ok');
         addView(data.id);
-        fetch(`/api/products?category=${data.category}`)
+        fetch(`/api/products?category=${data.category}&excludeId=${data.id}&limit=4`)
           .then((r) => r.json())
-          .then((all: Product[]) =>
-            setSimilar(all.filter((p) => p.id !== data.id).slice(0, 4))
-          )
+          .then((all: Product[]) => setSimilar(Array.isArray(all) ? all : []))
           .catch(() => {});
       })
       .catch(() => setStatus('notfound'));

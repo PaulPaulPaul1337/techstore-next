@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import ProductCard from '@/components/ProductCard';
@@ -10,23 +10,25 @@ import { useT } from '@/hooks/useT';
 import { getCategoryLabels } from '@/lib/i18n';
 
 const categories = Object.keys(categoryLabels) as Category[];
+const PAGE_SIZE = 24;
 
 function CatalogContent() {
   const t = useT();
   const searchParams = useSearchParams();
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [dbLoaded, setDbLoaded] = useState(false);
 
   const [category, setCategory] = useState<Category | ''>((searchParams.get('category') as Category) || '');
   const [search, setSearch] = useState(searchParams.get('q') || '');
   const [badge, setBadge] = useState(searchParams.get('badge') || '');
+  const [sort, setSort] = useState('default');
+  const [maxPrice, setMaxPrice] = useState(100000);
+  const [inStockOnly, setInStockOnly] = useState(false);
 
+  // Debounce free-text search so we don't hit the API on every keystroke
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   useEffect(() => {
-    fetch('/api/products')
-      .then((r) => r.json())
-      .then((data) => { setAllProducts(data); setDbLoaded(true); })
-      .catch(() => setDbLoaded(true));
-  }, []);
+    const id = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(id);
+  }, [search]);
 
   useEffect(() => {
     setCategory((searchParams.get('category') as Category) || '');
@@ -34,36 +36,47 @@ function CatalogContent() {
     setBadge(searchParams.get('badge') || '');
   }, [searchParams]);
 
-  const products = allProducts;
-  const [sort, setSort] = useState('default');
-  const [maxPrice, setMaxPrice] = useState(100000);
-  const [inStockOnly, setInStockOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const [items, setItems] = useState<Product[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [dbLoaded, setDbLoaded] = useState(false);
 
-  const filtered = useMemo(() => {
-    let result = products;
+  // Server-side filtering/sorting/pagination — the catalog never loads the full table into memory.
+  // When filters change, reset to page 1 instead of fetching a stale page with new filters.
+  const filterKey = JSON.stringify([category, badge, debouncedSearch, maxPrice, inStockOnly, sort]);
+  const prevFilterKeyRef = useRef(filterKey);
 
-    if (category) result = result.filter((p) => p.category === category);
-    if (badge) result = result.filter((p) => p.badge === badge);
-    if (inStockOnly) result = result.filter((p) => p.inStock);
-    if (maxPrice < 100000) result = result.filter((p) => p.price <= maxPrice);
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
-          p.specs.some((s) => s.toLowerCase().includes(q))
-      );
+  useEffect(() => {
+    if (prevFilterKeyRef.current !== filterKey) {
+      prevFilterKeyRef.current = filterKey;
+      if (page !== 1) { setPage(1); return; }
     }
 
-    switch (sort) {
-      case 'price_asc': return [...result].sort((a, b) => a.price - b.price);
-      case 'price_desc': return [...result].sort((a, b) => b.price - a.price);
-      case 'rating': return [...result].sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount);
-      case 'name': return [...result].sort((a, b) => a.name.localeCompare(b.name));
-      default: return result;
-    }
-  }, [category, badge, inStockOnly, maxPrice, search, sort]);
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+    if (badge) params.set('badge', badge);
+    if (debouncedSearch.trim()) params.set('q', debouncedSearch.trim());
+    if (maxPrice < 100000) params.set('maxPrice', String(maxPrice));
+    if (inStockOnly) params.set('inStock', '1');
+    if (sort !== 'default') params.set('sort', sort);
+    params.set('page', String(page));
+    params.set('limit', String(PAGE_SIZE));
+
+    fetch(`/api/products?${params.toString()}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setItems(Array.isArray(data.items) ? data.items : []);
+        setTotal(data.total ?? 0);
+        setTotalPages(data.totalPages ?? 1);
+        setDbLoaded(true);
+        setLoading(false);
+      })
+      .catch(() => { setDbLoaded(true); setLoading(false); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterKey, page]);
 
   function resetFilters() {
     setCategory('');
@@ -200,7 +213,7 @@ function CatalogContent() {
           {/* Toolbar */}
           <div className="flex items-center justify-between mb-4">
             <span className="text-(--muted) text-sm">
-              {t.foundLabel} <strong className="text-(--text)">{filtered.length}</strong> {t.productsUnit}
+              {t.foundLabel} <strong className="text-(--text)">{total}</strong> {t.productsUnit}
             </span>
             <select
               value={sort}
@@ -218,18 +231,40 @@ function CatalogContent() {
               <div className="text-4xl mb-3 animate-pulse">⏳</div>
               <div className="text-sm">{t.loadingProducts}</div>
             </div>
-          ) : filtered.length === 0 ? (
+          ) : items.length === 0 ? (
             <div className="text-center py-20 text-(--muted)">
               <div className="text-5xl mb-4">🔍</div>
               <div className="text-lg font-semibold mb-2">{t.nothingFound}</div>
               <button onClick={resetFilters} className="text-(--accent) underline text-sm hover:opacity-80">{t.resetFilters}</button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {filtered.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
+            <>
+              <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 transition-opacity ${loading ? 'opacity-50' : ''}`}>
+                {items.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-8">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1 || loading}
+                    className="h-9 px-4 border border-(--border) rounded text-sm text-(--text) hover:border-(--accent) transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {t.prevPage}
+                  </button>
+                  <span className="text-sm text-(--muted)">{t.pageOf(page, totalPages)}</span>
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages || loading}
+                    className="h-9 px-4 border border-(--border) rounded text-sm text-(--text) hover:border-(--accent) transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {t.nextPage}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

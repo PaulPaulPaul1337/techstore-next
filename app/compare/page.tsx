@@ -15,16 +15,17 @@ export default function ComparePage() {
   const clear = useCompareStore((s) => s.clear);
   const addItem = useCartStore((s) => s.addItem);
 
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    fetch('/api/products')
+    if (ids.length === 0) { setFetchedProducts([]); return; }
+    fetch(`/api/products?ids=${ids.join(',')}`)
       .then((r) => r.json())
-      .then((data: Product[]) => setAllProducts(Array.isArray(data) ? data : []))
+      .then((data: Product[]) => setFetchedProducts(Array.isArray(data) ? data : []))
       .catch(() => {});
-  }, []);
+  }, [ids]);
 
-  const compareItems = ids.map((id) => allProducts.find((p) => p.id === id)).filter((p): p is Product => Boolean(p));
+  const compareItems = ids.map((id) => fetchedProducts.find((p) => p.id === id)).filter((p): p is Product => Boolean(p));
 
   if (compareItems.length === 0) {
     return (

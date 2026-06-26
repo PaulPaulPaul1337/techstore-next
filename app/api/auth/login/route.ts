@@ -27,6 +27,10 @@ export async function POST(req: Request) {
     return Response.json({ error: 'invalid' }, { status: 401 });
   }
 
+  if (user.banned) {
+    return Response.json({ error: 'banned' }, { status: 403 });
+  }
+
   const token = await signToken({ userId: user.id, isAdmin: user.isAdmin });
   const cookie = buildAuthCookie(token);
 

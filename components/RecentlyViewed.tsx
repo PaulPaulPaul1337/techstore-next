@@ -12,16 +12,13 @@ export default function RecentlyViewed({ excludeId, limit = 8, className = 'mt-1
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    if (ids.length === 0) { setProducts([]); return; }
-    fetch('/api/products')
+    const wantedIds = ids.filter((id) => id !== excludeId).slice(0, limit);
+    if (wantedIds.length === 0) { setProducts([]); return; }
+    fetch(`/api/products?ids=${wantedIds.join(',')}`)
       .then((r) => r.json())
-      .then((all: Product[]) => {
-        const byId = new Map(all.map((p) => [p.id, p]));
-        const ordered = ids
-          .filter((id) => id !== excludeId)
-          .map((id) => byId.get(id))
-          .filter((p): p is Product => Boolean(p))
-          .slice(0, limit);
+      .then((fetched: Product[]) => {
+        const byId = new Map(fetched.map((p) => [p.id, p]));
+        const ordered = wantedIds.map((id) => byId.get(id)).filter((p): p is Product => Boolean(p));
         setProducts(ordered);
       })
       .catch(() => {});

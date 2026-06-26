@@ -91,6 +91,8 @@ export default function AuthModal() {
     setSubmitting(false);
     if (result === 'ok') {
       handleClose();
+    } else if (result === 'banned') {
+      setError(t.accountBanned);
     } else {
       setError(t.wrongCredentials);
     }

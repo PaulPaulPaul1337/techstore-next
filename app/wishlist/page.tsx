@@ -17,11 +17,12 @@ export default function WishlistPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    fetch('/api/products')
+    if (ids.length === 0) { setAllProducts([]); return; }
+    fetch(`/api/products?ids=${ids.join(',')}`)
       .then((r) => r.json())
       .then((data: Product[]) => setAllProducts(Array.isArray(data) ? data : []))
       .catch(() => {});
-  }, []);
+  }, [ids]);
 
   const wishItems = allProducts.filter((p) => ids.includes(p.id));
 

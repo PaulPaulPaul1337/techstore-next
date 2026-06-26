@@ -51,9 +51,15 @@ export default function AdminPage() {
           <h1 className="text-2xl font-bold">⚙️ Панель адміністратора</h1>
           <p className="text-(--muted) text-sm mt-1">Управління товарами магазину</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Link href="/admin/orders" className="bg-(--bg) border border-(--border) hover:border-(--accent) text-(--text) font-bold px-5 py-2.5 rounded-lg transition-colors text-sm">
             📋 Замовлення
+          </Link>
+          <Link href="/admin/users" className="bg-(--bg) border border-(--border) hover:border-(--accent) text-(--text) font-bold px-5 py-2.5 rounded-lg transition-colors text-sm">
+            👥 Користувачі
+          </Link>
+          <Link href="/admin/reviews" className="bg-(--bg) border border-(--border) hover:border-(--accent) text-(--text) font-bold px-5 py-2.5 rounded-lg transition-colors text-sm">
+            💬 Відгуки
           </Link>
           <Link href="/admin/slides" className="bg-(--bg) border border-(--border) hover:border-(--accent) text-(--text) font-bold px-5 py-2.5 rounded-lg transition-colors text-sm">
             🖼 Слайди

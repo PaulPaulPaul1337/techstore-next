@@ -14,7 +14,7 @@ interface AuthState {
   user: AuthUser | null;
   loading: boolean;
   init: () => Promise<void>;              // Call on app mount to restore session
-  login: (email: string, password: string) => Promise<'ok' | 'invalid'>;
+  login: (email: string, password: string) => Promise<'ok' | 'invalid' | 'banned'>;
   register: (name: string, email: string, password: string) => Promise<'ok' | 'exists'>;
   requestPasswordReset: (email: string) => Promise<{ status: 'ok' | 'notfound'; code?: string }>;
   verifyResetCode: (email: string, code: string) => Promise<'ok' | 'invalid'>;
@@ -51,6 +51,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       body: JSON.stringify({ email, password }),
     });
     console.log('[authStore.login] email=%s passwordLength=%d status=%d', email, password.length, res.status);
+    if (res.status === 403) return 'banned';
     if (!res.ok) return 'invalid';
     const user = await res.json();
     set({ user });
